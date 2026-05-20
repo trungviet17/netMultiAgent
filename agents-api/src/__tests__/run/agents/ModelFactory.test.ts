@@ -716,7 +716,7 @@ describe('ModelFactory', () => {
         expect(errors).toEqual([]);
       });
 
-      test('should reject config with API keys in provider options', () => {
+      test('should allow apiKey in provider options for transient runtime injection', () => {
         const config: ModelSettings = {
           model: 'anthropic/claude-sonnet-4-20250514',
           providerOptions: {
@@ -726,12 +726,10 @@ describe('ModelFactory', () => {
         };
 
         const errors = ModelFactory.validateConfig(config);
-        expect(errors).toHaveLength(1);
-        expect(errors[0]).toContain('API keys should not be stored in provider options');
-        expect(errors[0]).toContain('Use environment variables');
+        expect(errors).toHaveLength(0);
       });
 
-      test('should reject config with API keys in different scenarios', () => {
+      test('should allow apiKey in provider options across providers', () => {
         const config: ModelSettings = {
           model: 'openai/gpt-4o',
           providerOptions: {
@@ -741,9 +739,7 @@ describe('ModelFactory', () => {
         };
 
         const errors = ModelFactory.validateConfig(config);
-        expect(errors).toHaveLength(1);
-        expect(errors[0]).toContain('API keys should not be stored in provider options');
-        expect(errors[0]).toContain('Use environment variables');
+        expect(errors).toHaveLength(0);
       });
 
       test('should allow valid configs without API keys', () => {
