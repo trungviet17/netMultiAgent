@@ -4,7 +4,7 @@ export { default as ChromePinIcon } from './chrome-pin.svg?react';
 export { default as ChromePuzzleIcon } from './chrome-puzzle.svg?react';
 export { default as EdgeArrow } from './edge-arrow.svg?react';
 export { default as EnumIcon } from './enum.svg?react';
-export { default as InkeepLogo } from './inkeep.svg?react';
+export { InkeepLogo } from './inkeep-logo';
 export { default as NumberIcon } from './number.svg?react';
 export { default as ObjectIcon } from './object.svg?react';
 export { default as SelectedEdgeArrow } from './selected-edge-arrow.svg?react';
