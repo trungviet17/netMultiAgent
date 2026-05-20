@@ -19,6 +19,7 @@ export * from './manage/improvementRowRevert';
 export * from './manage/projectFull';
 export * from './manage/projectLifecycle';
 export * from './manage/projects';
+export * from './manage/providerCredentials';
 export * from './manage/skills';
 export * from './manage/subAgentExternalAgentRelations';
 export * from './manage/subAgentRelations';

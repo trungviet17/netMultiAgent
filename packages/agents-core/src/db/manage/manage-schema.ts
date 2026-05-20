@@ -749,6 +749,37 @@ export const credentialReferences = pgTable(
   ]
 );
 
+export const providerCredentials = pgTable(
+  'provider_credentials',
+  {
+    ...projectScoped,
+    provider: varchar('provider', { length: 64 }).notNull(),
+    label: varchar('label', { length: 256 }),
+    baseUrl: varchar('base_url', { length: 512 }),
+    encryptedKey: text('encrypted_key').notNull(),
+    encryptionIv: text('encryption_iv').notNull(),
+    authTag: text('auth_tag').notNull(),
+    keyFingerprint: varchar('key_fingerprint', { length: 32 }).notNull(),
+    enabled: boolean('enabled').notNull().default(true),
+    lastTestStatus: varchar('last_test_status', { length: 32 }),
+    lastTestMessage: text('last_test_message'),
+    lastTestedAt: timestamp('last_tested_at', { mode: 'string' }),
+    createdBy: varchar('created_by', { length: 256 }),
+    ...timestamps,
+  },
+  (t) => [
+    primaryKey({ columns: [t.tenantId, t.projectId, t.id] }),
+    foreignKey({
+      columns: [t.tenantId, t.projectId],
+      foreignColumns: [projects.tenantId, projects.id],
+      name: 'provider_credentials_project_fk',
+    }).onDelete('cascade'),
+    unique('provider_credentials_id_unique').on(t.id),
+    unique('provider_credentials_provider_unique').on(t.tenantId, t.projectId, t.provider, t.label),
+    index('provider_credentials_provider_idx').on(t.tenantId, t.projectId, t.provider),
+  ]
+);
+
 /**
  * A collection of test cases/items used for evaluation. Contains dataset items
  * that define input/output pairs for testing agents. Used for batch evaluation
@@ -1094,8 +1125,16 @@ export const projectsRelations = relations(projects, ({ many }) => ({
   dataComponents: many(dataComponents),
   artifactComponents: many(artifactComponents),
   credentialReferences: many(credentialReferences),
+  providerCredentials: many(providerCredentials),
   skills: many(skills),
   skillFiles: many(skillFiles),
+}));
+
+export const providerCredentialsRelations = relations(providerCredentials, ({ one }) => ({
+  project: one(projects, {
+    fields: [providerCredentials.tenantId, providerCredentials.projectId],
+    references: [projects.tenantId, projects.id],
+  }),
 }));
 
 export const contextConfigsRelations = relations(contextConfigs, ({ many, one }) => ({

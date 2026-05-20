@@ -142,6 +142,13 @@ export class ModelFactory {
       providerConfig.apiVersion = providerOptions.apiVersion;
     }
 
+    // Allow callers to inject an API key from the DB-backed provider-credentials store.
+    // Project-level model config should NOT carry apiKey directly (validateConfig still rejects it
+    // there); this branch exists for transient runtime injection.
+    if (typeof providerOptions.apiKey === 'string' && providerOptions.apiKey.length > 0) {
+      providerConfig.apiKey = providerOptions.apiKey;
+    }
+
     return providerConfig;
   }
 
@@ -400,12 +407,9 @@ export class ModelFactory {
     }
 
     if (config.providerOptions) {
-      if (config.providerOptions.apiKey) {
-        errors.push(
-          'API keys should not be stored in provider options. ' +
-            'Use environment variables (ANTHROPIC_API_KEY, OPENAI_API_KEY) or credential store instead.'
-        );
-      }
+      // Note: apiKey is allowed in providerOptions for transient runtime injection
+      // (from the DB-backed provider credentials store). Persisted project configs
+      // should still avoid putting apiKey here; the Manage API strips it on save.
 
       if (config.providerOptions.maxDuration !== undefined) {
         const maxDuration = config.providerOptions.maxDuration;

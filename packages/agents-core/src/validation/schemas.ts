@@ -26,6 +26,7 @@ import {
   functions,
   functionTools,
   projects,
+  providerCredentials,
   subAgentArtifactComponents,
   subAgentDataComponents,
   subAgentExternalAgentRelations,
@@ -2316,6 +2317,89 @@ export const CredentialReferenceApiUpdateSchema = createApiUpdateSchema(
     type: z.enum(CredentialStoreType).optional(),
   })
   .openapi('CredentialReferenceUpdate');
+
+export const ProviderCredentialProviders = [
+  'anthropic',
+  'openai',
+  'google',
+  'openrouter',
+  'custom',
+] as const;
+export type ProviderCredentialProvider = (typeof ProviderCredentialProviders)[number];
+
+export const ProviderCredentialSelectSchema = createSelectSchema(providerCredentials);
+
+export const ProviderCredentialApiSelectSchema = z
+  .object({
+    id: z.string(),
+    tenantId: z.string(),
+    projectId: z.string(),
+    provider: z.enum(ProviderCredentialProviders),
+    label: z.string().nullable().optional(),
+    baseUrl: z.string().nullable().optional(),
+    enabled: z.boolean(),
+    keyPreview: z.string().describe('Masked preview of the API key (e.g. "sk-a••••wxyz")'),
+    lastTestStatus: z.enum(['success', 'failure', 'pending']).nullable().optional(),
+    lastTestMessage: z.string().nullable().optional(),
+    lastTestedAt: z.string().nullable().optional(),
+    createdAt: z.string(),
+    updatedAt: z.string(),
+  })
+  .openapi('ProviderCredential');
+
+export const ProviderCredentialApiInsertSchema = z
+  .object({
+    id: ResourceIdSchema.optional(),
+    provider: z.enum(ProviderCredentialProviders),
+    label: z.string().max(256).optional(),
+    apiKey: z.string().min(1, 'API key is required'),
+    baseUrl: z
+      .string()
+      .url('baseUrl must be a valid URL')
+      .max(512)
+      .optional()
+      .describe('Required for provider="custom"'),
+    enabled: z.boolean().default(true).optional(),
+  })
+  .refine(
+    (val) =>
+      val.provider !== 'custom' || (typeof val.baseUrl === 'string' && val.baseUrl.length > 0),
+    { message: 'baseUrl is required when provider is "custom"', path: ['baseUrl'] }
+  )
+  .openapi('ProviderCredentialCreate');
+
+export const ProviderCredentialApiUpdateSchema = z
+  .object({
+    label: z.string().max(256).optional(),
+    apiKey: z.string().min(1).optional(),
+    baseUrl: z.string().url().max(512).optional(),
+    enabled: z.boolean().optional(),
+  })
+  .openapi('ProviderCredentialUpdate');
+
+export const ProviderCredentialTestRequestSchema = z
+  .object({
+    provider: z.enum(ProviderCredentialProviders),
+    apiKey: z.string().min(1),
+    baseUrl: z.string().url().optional(),
+  })
+  .openapi('ProviderCredentialTestRequest');
+
+export const ProviderCredentialTestResponseSchema = z
+  .object({
+    success: z.boolean(),
+    message: z.string(),
+    latencyMs: z.number().optional(),
+  })
+  .openapi('ProviderCredentialTestResponse');
+
+export const ProviderCredentialResponseSchema = z
+  .object({ data: ProviderCredentialApiSelectSchema })
+  .openapi('ProviderCredentialResponse');
+
+export const ProviderCredentialListResponseSchema = z
+  .object({ data: z.array(ProviderCredentialApiSelectSchema) })
+  .openapi('ProviderCredentialListResponse');
 
 export const CredentialStoreSchema = z
   .object({

@@ -337,7 +337,7 @@ export async function runGenerate(
         span.setAttributes(breakdownAttributes);
 
         const { primaryModelSettings, modelSettings, hasStructuredOutput, timeoutMs } =
-          configureModelSettings(ctx);
+          await configureModelSettings(ctx);
 
         const resolvedModelId = primaryModelSettings.model ?? '';
         const { compatible: compatibleFileParts, stripped } = stripIncompatibleOfficeParts(

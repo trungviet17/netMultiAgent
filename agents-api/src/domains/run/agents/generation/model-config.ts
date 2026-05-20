@@ -1,4 +1,9 @@
-import { ModelFactory, type ModelSettings } from '@inkeep/agents-core';
+import {
+  ModelFactory,
+  type ModelSettings,
+  resolveModelSettingsWithDbCredentials,
+} from '@inkeep/agents-core';
+import manageDbClient from '../../../../data/db/manageDbClient';
 import { getLogger } from '../../../../logger';
 import {
   AGENT_EXECUTION_MAX_GENERATION_STEPS,
@@ -82,19 +87,26 @@ export function getSummarizerModel(config: AgentConfig): ModelSettings {
   };
 }
 
-export function configureModelSettings(ctx: AgentRunContext): {
+export async function configureModelSettings(ctx: AgentRunContext): Promise<{
   primaryModelSettings: ModelSettings;
   modelSettings: any;
   hasStructuredOutput: boolean;
   timeoutMs: number;
-} {
+}> {
   const hasStructuredOutput = Boolean(
     ctx.config.dataComponents && ctx.config.dataComponents.length > 0
   );
 
-  const primaryModelSettings = hasStructuredOutput
+  const rawPrimaryModelSettings = hasStructuredOutput
     ? getStructuredOutputModel(ctx.config)
     : getPrimaryModel(ctx.config);
+
+  const primaryModelSettings = await resolveModelSettingsWithDbCredentials({
+    db: manageDbClient,
+    scopes: { tenantId: ctx.config.tenantId, projectId: ctx.config.projectId },
+    modelSettings: rawPrimaryModelSettings,
+  });
+
   const modelSettings = ModelFactory.prepareGenerationConfig(primaryModelSettings);
 
   const configuredTimeout = modelSettings.maxDuration

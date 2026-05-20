@@ -35,7 +35,7 @@ vi.mock('../../../domains/run/agents/generation/conversation-history', () => ({
 }));
 
 vi.mock('../../../domains/run/agents/generation/model-config', () => ({
-  configureModelSettings: vi.fn().mockReturnValue({
+  configureModelSettings: vi.fn().mockResolvedValue({
     primaryModelSettings: { model: 'anthropic/claude-3-5-sonnet-20241022' },
     modelSettings: { model: 'mocked-model', maxDuration: 60 },
     hasStructuredOutput: false,
@@ -240,7 +240,7 @@ describe('runGenerate — strip + warn', () => {
     const { configureModelSettings } = await import(
       '../../../domains/run/agents/generation/model-config'
     );
-    vi.mocked(configureModelSettings).mockReturnValueOnce({
+    vi.mocked(configureModelSettings).mockResolvedValueOnce({
       primaryModelSettings: { model: 'openai/gpt-4o' },
       modelSettings: { model: 'mocked-model', maxDuration: 60 },
       hasStructuredOutput: false,

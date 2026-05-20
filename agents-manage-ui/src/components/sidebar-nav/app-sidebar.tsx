@@ -185,6 +185,11 @@ export const AppSidebar: FC<AppSidebarProps> = ({ open, setOpen, ...props }) => 
           icon: Lock,
         },
         {
+          title: 'Provider Credentials',
+          url: `/${tenantId}/projects/${projectId}/provider-credentials`,
+          icon: Key,
+        },
+        {
           title: STATIC_LABELS['external-agents'],
           url: `/${tenantId}/projects/${projectId}/external-agents`,
           icon: Globe,

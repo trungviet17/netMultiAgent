@@ -21,6 +21,7 @@ import { Input } from '@/components/ui/input';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Separator } from '@/components/ui/separator';
 import { useAgentActions } from '@/features/agent/state/use-agent-store';
+import { useEnabledProvidersQuery } from '@/lib/query/provider-credentials';
 import { cn } from '@/lib/utils';
 
 interface ModelSelectorProps {
@@ -55,6 +56,10 @@ export const ModelSelector: FC<ModelSelectorProps> = ({
   onClose,
 }) => {
   const [open, setOpen] = useState(defaultOpen);
+
+  const { data: enabledProviders = [] } = useEnabledProvidersQuery();
+  const hasProviderFilter = enabledProviders.length > 0;
+  const enabledSet = new Set(enabledProviders);
 
   const [showCustomInput, setShowCustomInput] = useState<
     'openrouter' | 'gateway' | 'nim' | 'custom' | 'azure' | null
@@ -230,6 +235,7 @@ export const ModelSelector: FC<ModelSelectorProps> = ({
                 .filter(
                   ([provider]) => !gatewayOnly || GATEWAY_ROUTABLE_PROVIDERS_SET.has(provider)
                 )
+                .filter(([provider]) => !hasProviderFilter || enabledSet.has(provider))
                 .map(([provider, models]) => (
                   <CommandGroup key={provider} heading={provider}>
                     {models.map((model) => (
@@ -256,7 +262,7 @@ export const ModelSelector: FC<ModelSelectorProps> = ({
                   </CommandGroup>
                 ))}
               {/* Custom OpenAI-compatible */}
-              {!gatewayOnly && (
+              {!gatewayOnly && (!hasProviderFilter || enabledSet.has('custom')) && (
                 <CommandGroup heading="Custom OpenAI-compatible">
                   <CommandItem
                     className="flex items-center justify-between cursor-pointer text-foreground"
@@ -274,18 +280,20 @@ export const ModelSelector: FC<ModelSelectorProps> = ({
               {/* LLM Gateway options */}
               {!gatewayOnly && (
                 <CommandGroup heading="LLM Gateway">
-                  <CommandItem
-                    className="flex items-center justify-between cursor-pointer text-foreground"
-                    value="__openrouter__"
-                    onSelect={() => {
-                      setShowCustomInput('openrouter');
-                      setOpen(false);
-                      setCustomModelInput('');
-                      onValueChange('openrouter/...');
-                    }}
-                  >
-                    OpenRouter ...
-                  </CommandItem>
+                  {(!hasProviderFilter || enabledSet.has('openrouter')) && (
+                    <CommandItem
+                      className="flex items-center justify-between cursor-pointer text-foreground"
+                      value="__openrouter__"
+                      onSelect={() => {
+                        setShowCustomInput('openrouter');
+                        setOpen(false);
+                        setCustomModelInput('');
+                        onValueChange('openrouter/...');
+                      }}
+                    >
+                      OpenRouter ...
+                    </CommandItem>
+                  )}
                   <CommandItem
                     className="flex items-center justify-between cursor-pointer text-foreground"
                     value="__gateway__"

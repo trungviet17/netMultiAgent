@@ -21,6 +21,7 @@ import mergeRoutes from './merge';
 import projectMembersRoutes from './projectMembers';
 import projectPermissionsRoutes from './projectPermissions';
 import projectsRoutes from './projects';
+import providerCredentialsRoutes from './providerCredentials';
 import refRoutes from './ref';
 import scheduledTriggersRoutes from './scheduledTriggers';
 import skillsRoutes from './skills';
@@ -92,6 +93,7 @@ app.route('/projects/:projectId/agents/:agentId/context-configs', contextConfigs
 app.route('/projects/:projectId/conversations', conversationsRoutes);
 app.route('/projects/:projectId/credentials', credentialsRoutes);
 app.route('/projects/:projectId/credential-stores', credentialStoresRoutes);
+app.route('/projects/:projectId/provider-credentials', providerCredentialsRoutes);
 app.route('/projects/:projectId/data-components', dataComponentsRoutes);
 app.route('/projects/:projectId/external-agents', externalAgentsRoutes);
 app.route('/projects/:projectId/agents/:agentId/function-tools', functionToolsRoutes);

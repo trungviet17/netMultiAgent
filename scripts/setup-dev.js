@@ -65,8 +65,8 @@ function validateEnvironmentEarly() {
 
   const required = [
     {
-      name: 'ANTHROPIC_API_KEY',
-      hint: 'Get one at https://console.anthropic.com/',
+      name: 'CUSTOM_LLM_API_KEY',
+      hint: 'API key for your custom OpenAI-compatible endpoint',
     },
   ];
 
