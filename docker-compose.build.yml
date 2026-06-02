@@ -1,0 +1,39 @@
+# =============================================================================
+# Build the three app images from this repo's source and push them to a
+# registry (Docker Hub by default).
+#
+#   export DOCKERHUB_NAMESPACE=your-dockerhub-user   # required
+#   export IMAGE_TAG=0.73.5                           # optional (default: latest)
+#
+#   docker login
+#   docker compose -f docker-compose.build.yml build
+#   docker compose -f docker-compose.build.yml push
+#
+# All three services share the same multi-stage Dockerfile (different `target`),
+# so BuildKit runs the heavy install/build stages only once per `build`.
+#
+# For multi-architecture (amd64 + arm64) images, use `docker buildx` instead —
+# see the "Multi-architecture images" section in DOCKER.md.
+# =============================================================================
+
+services:
+  agents-api:
+    image: ${DOCKERHUB_NAMESPACE:?Set DOCKERHUB_NAMESPACE in your environment or .env}/agents-api:${IMAGE_TAG:-latest}
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: api
+
+  agents-manage-ui:
+    image: ${DOCKERHUB_NAMESPACE:?Set DOCKERHUB_NAMESPACE in your environment or .env}/agents-manage-ui:${IMAGE_TAG:-latest}
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: manage-ui
+
+  agents-migrate:
+    image: ${DOCKERHUB_NAMESPACE:?Set DOCKERHUB_NAMESPACE in your environment or .env}/agents-migrate:${IMAGE_TAG:-latest}
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: migrate

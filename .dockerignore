@@ -1,0 +1,58 @@
+# Keep the build context small and reproducible.
+# node_modules / build artifacts are reinstalled and rebuilt inside the image.
+#
+# IMPORTANT: every directory listed as a workspace package in
+# pnpm-workspace.yaml (agents-api, agents-manage-ui, agents-cli, agents-ui-demo,
+# agents-docs, agents-cookbook, test-agents, packages/*) MUST stay in the
+# context — `pnpm install --frozen-lockfile` fails if a workspace member's
+# package.json is missing. Only their node_modules / build outputs are pruned.
+
+# Dependencies (reinstalled via `pnpm install` in the builder stage)
+**/node_modules
+.pnpm-store
+
+# Build outputs (rebuilt by `turbo build` in the builder stage)
+**/dist
+**/build
+**/.next
+**/.turbo
+.turbo
+**/coverage
+**/.tsbuildinfo
+agents-mcp/esm
+agents-mcp/bin
+
+# Secrets & local env (provided at runtime via compose env, never baked in)
+.env
+.env.*
+!.env.docker.example
+!.env.example
+
+# Local databases / blob storage / state
+.blob-storage
+.isolated-envs
+.setup-complete
+*.sqlite
+*.db
+
+# VCS / editor / CI / agent tooling the image doesn't need
+.git
+.github
+.husky
+.vscode
+.cursor
+.opencode
+.ai-dev
+.changeset
+**/__tests__
+**/*.test.ts
+**/*.spec.ts
+**/__screenshots__
+
+# Separate workspace (own lockfile) — not part of the root install/build
+create-agents-template
+
+# Misc large / irrelevant files
+logo.png
+*.log
+docs-legacy
