@@ -55,7 +55,12 @@ COPY . .
 RUN pnpm install --frozen-lockfile --prefer-offline
 # Builds @inkeep/agents-api, @inkeep/agents-manage-ui and everything they
 # depend on (agents-core, agents-email, agents-mcp, agents-work-apps).
+# --concurrency=1 serializes the builds so peak memory stays near a single
+# build. The Next.js (Turbopack) build of manage-ui is memory-hungry and gets
+# OOM-killed (exit 137) when it competes with the other package builds on a
+# small Docker VM (~8 GB). Raise this only if the Docker VM has ample RAM.
 RUN pnpm exec turbo build \
+      --concurrency=1 \
       --filter=@inkeep/agents-api \
       --filter=@inkeep/agents-manage-ui
 
