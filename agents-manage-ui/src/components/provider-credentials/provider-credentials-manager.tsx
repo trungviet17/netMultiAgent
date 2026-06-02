@@ -78,9 +78,8 @@ export function ProviderCredentialsManager({ tenantId, initial, canEdit }: Props
       else toast.error(res.message);
     } catch (e) {
       toast.error((e as Error).message);
-    } finally {
-      setTesting(false);
     }
+    setTesting(false);
   };
 
   const onSubmit = (e: React.FormEvent) => {
