@@ -183,6 +183,30 @@ docker compose -f docker-compose.deploy.yml ps
 - API / OpenAPI: `http://<host>:3002`
 - Đăng nhập bằng `INKEEP_AGENTS_MANAGE_UI_USERNAME` / `INKEEP_AGENTS_MANAGE_UI_PASSWORD` đã đặt ở mục 3.2.
 
+### 6.2. Đổi cổng (port) host
+
+Các cổng host đều đọc từ `.env` / `.env.docker`, mặc định giữ nguyên giá trị cũ nên không cần đặt gì nếu bạn dùng cổng tiêu chuẩn. Khi cần tránh xung đột cổng, đặt các biến sau (và cập nhật `*_URL` tương ứng):
+
+```dotenv
+# docker-compose.deploy.yml (và docker-compose.yml)
+AGENTS_API_PORT=3002        # cổng host của Agents API
+MANAGE_UI_PORT=3000         # cổng host của Manage UI
+```
+
+Với stack DB cục bộ (`docker-compose.dbs.yml`) còn có:
+
+```dotenv
+DOLTGRES_PORT=5432          # phải khớp port trong INKEEP_AGENTS_MANAGE_DATABASE_URL
+POSTGRES_PORT=5433          # phải khớp port trong INKEEP_AGENTS_RUN_DATABASE_URL
+SPICEDB_GRPC_PORT=50051     # phải khớp port trong SPICEDB_ENDPOINT
+SPICEDB_HTTP_PORT=8443
+SPICEDB_POSTGRES_PORT=5434
+MAILPIT_UI_PORT=8025
+SMTP_PORT=1025              # đồng thời là cổng SMTP host của mailpit
+```
+
+> Lưu ý: cổng host của DB phải khớp với cổng nhúng trong connection URL / endpoint, vì Docker Compose không tự phân tích URL được.
+
 ---
 
 ## 7. Vận hành

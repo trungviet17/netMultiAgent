@@ -18,7 +18,7 @@ services:
       - SMTP_HOST
       - SMTP_FROM_ADDRESS
     ports:
-      - "3000:3000"
+      - "${MANAGE_UI_PORT:-3000}:3000"
     depends_on:
       inkeep-agents-api:
         condition: service_started
@@ -60,7 +60,7 @@ services:
       - SMTP_FROM_NAME
       - SMTP_REPLY_TO
     ports:
-      - "3002:3002"
+      - "${AGENTS_API_PORT:-3002}:3002"
     depends_on:
       inkeep-agents-doltgres-db:
         condition: service_healthy

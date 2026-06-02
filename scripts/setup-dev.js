@@ -366,6 +366,8 @@ if (isolatedName) {
   // Default mode: standard setup with docker-compose.dbs.yml
   ensureCopilotKeys();
 
+  const apiPort = process.env.AGENTS_API_PORT || '3002';
+
   await runSetup({
     dockerComposeFile: 'docker-compose.dbs.yml',
     manageMigrateCommand: 'pnpm db:manage:migrate',
@@ -385,7 +387,7 @@ if (isolatedName) {
     ],
     afterPush: ensureCopilotApp,
     devApiCommand: 'pnpm turbo dev --filter @inkeep/agents-api',
-    apiHealthUrl: 'http://localhost:3002/health',
+    apiHealthUrl: `http://localhost:${apiPort}/health`,
     isCloud: false,
     skipDocker,
     skipPush,
