@@ -9,6 +9,7 @@ import {
   getMcpToolById,
   type McpTool,
   type Part,
+  resolveModelsWithDbCredentials,
   type SubAgentApiSelect,
   TaskState,
   type TextPart,
@@ -685,7 +686,18 @@ export const createTaskHandlerConfig = async (params: {
   }
 
   // Cast to satisfy resolveModelConfig - it only uses the models property
-  const effectiveModels = await resolveModelConfig(executionContext, subAgent);
+  const mergedModels = await resolveModelConfig(executionContext, subAgent);
+  // Inject DB-backed provider credentials into EVERY model slot (base/structuredOutput/
+  // summarizer), not just the primary one. Downstream paths (summarization, compression,
+  // conversation-history distillation, structured-output, status updates) all read these
+  // slots and would otherwise fail for custom/openrouter providers that rely on the
+  // credential row for baseURL + apiKey.
+  const effectiveModels =
+    (await resolveModelsWithDbCredentials({
+      db: runDbClient,
+      scopes: { tenantId: executionContext.tenantId },
+      models: mergedModels,
+    })) ?? mergedModels;
   const effectiveConversationHistoryConfig = subAgent.conversationHistoryConfig;
 
   return {

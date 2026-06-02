@@ -4,9 +4,13 @@ import {
   createApiError,
   createProviderCredential,
   deleteProviderCredential,
+  discoverModelsForProvider,
   ErrorResponseSchema,
   getProviderCredential,
+  getProviderCredentialDecrypted,
   listProviderCredentials,
+  type OrgRole,
+  OrgRoles,
   ProviderCredentialApiInsertSchema,
   ProviderCredentialApiSelectSchema,
   ProviderCredentialApiUpdateSchema,
@@ -15,16 +19,27 @@ import {
   ProviderCredentialTestRequestSchema,
   ProviderCredentialTestResponseSchema,
   recordProviderCredentialTest,
-  TenantProjectIdParamsSchema,
-  TenantProjectParamsSchema,
+  TenantIdParamsSchema,
+  TenantParamsSchema,
   testProviderConnection,
   updateProviderCredential,
 } from '@inkeep/agents-core';
-import { createProtectedRoute } from '@inkeep/agents-core/middleware';
-import { requireProjectPermission } from '../../../middleware/projectAccess';
+import { createProtectedRoute, inheritedManageTenantAuth } from '@inkeep/agents-core/middleware';
+import type { Context } from 'hono';
+import runDbClient from '../../../data/db/runDbClient';
 import type { ManageAppVariables } from '../../../types/app';
 
 const app = new OpenAPIHono<{ Variables: ManageAppVariables }>();
+
+// Provider credentials are tenant/org-wide: any org member can read them, but only
+// org admins/owners may mutate (create/update/delete/test). Tenant membership and
+// `tenantRole` are enforced upstream by requireTenantAccess() in createApp.ts.
+function assertOrgAdmin(c: Context<{ Variables: ManageAppVariables }>): void {
+  const tenantRole = c.get('tenantRole') as OrgRole | undefined;
+  if (!tenantRole || (tenantRole !== OrgRoles.ADMIN && tenantRole !== OrgRoles.OWNER)) {
+    throw createApiError({ code: 'forbidden', message: 'Admin access required' });
+  }
+}
 
 app.openapi(
   createProtectedRoute({
@@ -33,9 +48,9 @@ app.openapi(
     summary: 'List Provider Credentials',
     operationId: 'list-provider-credentials',
     tags: ['Provider Credentials'],
-    permission: requireProjectPermission('view'),
+    permission: inheritedManageTenantAuth(),
     request: {
-      params: TenantProjectParamsSchema,
+      params: TenantParamsSchema,
     },
     responses: {
       200: {
@@ -48,50 +63,12 @@ app.openapi(
     },
   }),
   async (c) => {
-    const db = c.get('db');
-    const { tenantId, projectId } = c.req.valid('param');
+    const db = runDbClient;
+    const { tenantId } = c.req.valid('param');
     const data = await listProviderCredentials(db)({
-      scopes: { tenantId, projectId },
+      scopes: { tenantId },
     });
     return c.json({ data });
-  }
-);
-
-app.openapi(
-  createProtectedRoute({
-    method: 'get',
-    path: '/{id}',
-    summary: 'Get Provider Credential',
-    operationId: 'get-provider-credential',
-    tags: ['Provider Credentials'],
-    permission: requireProjectPermission('view'),
-    request: {
-      params: TenantProjectIdParamsSchema,
-    },
-    responses: {
-      200: {
-        description: 'Provider credential found',
-        content: {
-          'application/json': { schema: ProviderCredentialResponseSchema },
-        },
-      },
-      ...commonGetErrorResponses,
-    },
-  }),
-  async (c) => {
-    const db = c.get('db');
-    const { tenantId, projectId, id } = c.req.valid('param');
-    const credential = await getProviderCredential(db)({
-      scopes: { tenantId, projectId },
-      id,
-    });
-    if (!credential) {
-      throw createApiError({
-        code: 'not_found',
-        message: 'Provider credential not found',
-      });
-    }
-    return c.json({ data: ProviderCredentialApiSelectSchema.parse(credential) });
   }
 );
 
@@ -102,9 +79,9 @@ app.openapi(
     summary: 'Create Provider Credential',
     operationId: 'create-provider-credential',
     tags: ['Provider Credentials'],
-    permission: requireProjectPermission('edit'),
+    permission: inheritedManageTenantAuth(),
     request: {
-      params: TenantProjectParamsSchema,
+      params: TenantParamsSchema,
       body: {
         content: {
           'application/json': { schema: ProviderCredentialApiInsertSchema },
@@ -122,13 +99,14 @@ app.openapi(
     },
   }),
   async (c) => {
-    const db = c.get('db');
-    const { tenantId, projectId } = c.req.valid('param');
+    assertOrgAdmin(c);
+    const db = runDbClient;
+    const { tenantId } = c.req.valid('param');
     const body = c.req.valid('json');
     const userId = c.get('userId') as string | undefined;
 
     const credential = await createProviderCredential(db)({
-      scopes: { tenantId, projectId },
+      scopes: { tenantId },
       id: body.id,
       provider: body.provider,
       label: body.label,
@@ -149,9 +127,9 @@ app.openapi(
     summary: 'Update Provider Credential',
     operationId: 'update-provider-credential',
     tags: ['Provider Credentials'],
-    permission: requireProjectPermission('edit'),
+    permission: inheritedManageTenantAuth(),
     request: {
-      params: TenantProjectIdParamsSchema,
+      params: TenantIdParamsSchema,
       body: {
         content: {
           'application/json': { schema: ProviderCredentialApiUpdateSchema },
@@ -169,12 +147,13 @@ app.openapi(
     },
   }),
   async (c) => {
-    const db = c.get('db');
-    const { tenantId, projectId, id } = c.req.valid('param');
+    assertOrgAdmin(c);
+    const db = runDbClient;
+    const { tenantId, id } = c.req.valid('param');
     const body = c.req.valid('json');
 
     const credential = await updateProviderCredential(db)({
-      scopes: { tenantId, projectId },
+      scopes: { tenantId },
       id,
       data: body,
     });
@@ -196,9 +175,9 @@ app.openapi(
     summary: 'Delete Provider Credential',
     operationId: 'delete-provider-credential',
     tags: ['Provider Credentials'],
-    permission: requireProjectPermission('edit'),
+    permission: inheritedManageTenantAuth(),
     request: {
-      params: TenantProjectIdParamsSchema,
+      params: TenantIdParamsSchema,
     },
     responses: {
       204: { description: 'Deleted' },
@@ -209,10 +188,11 @@ app.openapi(
     },
   }),
   async (c) => {
-    const db = c.get('db');
-    const { tenantId, projectId, id } = c.req.valid('param');
+    assertOrgAdmin(c);
+    const db = runDbClient;
+    const { tenantId, id } = c.req.valid('param');
     const deleted = await deleteProviderCredential(db)({
-      scopes: { tenantId, projectId },
+      scopes: { tenantId },
       id,
     });
     if (!deleted) {
@@ -232,9 +212,9 @@ app.openapi(
     summary: 'Test Provider Credentials',
     operationId: 'test-provider-credential',
     tags: ['Provider Credentials'],
-    permission: requireProjectPermission('edit'),
+    permission: inheritedManageTenantAuth(),
     request: {
-      params: TenantProjectParamsSchema,
+      params: TenantParamsSchema,
       body: {
         content: {
           'application/json': { schema: ProviderCredentialTestRequestSchema },
@@ -252,6 +232,7 @@ app.openapi(
     },
   }),
   async (c) => {
+    assertOrgAdmin(c);
     const body = c.req.valid('json');
     const result = await testProviderConnection({
       provider: body.provider,
@@ -269,9 +250,9 @@ app.openapi(
     summary: 'Test Stored Provider Credential',
     operationId: 'test-stored-provider-credential',
     tags: ['Provider Credentials'],
-    permission: requireProjectPermission('edit'),
+    permission: inheritedManageTenantAuth(),
     request: {
-      params: TenantProjectIdParamsSchema,
+      params: TenantIdParamsSchema,
     },
     responses: {
       200: {
@@ -284,12 +265,12 @@ app.openapi(
     },
   }),
   async (c) => {
-    const db = c.get('db');
-    const { tenantId, projectId, id } = c.req.valid('param');
+    assertOrgAdmin(c);
+    const db = runDbClient;
+    const { tenantId, id } = c.req.valid('param');
 
-    const { getProviderCredentialDecrypted } = await import('@inkeep/agents-core');
     const cred = await getProviderCredential(db)({
-      scopes: { tenantId, projectId },
+      scopes: { tenantId },
       id,
     });
     if (!cred) {
@@ -299,7 +280,7 @@ app.openapi(
       });
     }
     const decrypted = await getProviderCredentialDecrypted(db)({
-      scopes: { tenantId, projectId },
+      scopes: { tenantId },
       provider: cred.provider,
     });
     if (!decrypted) {
@@ -316,13 +297,94 @@ app.openapi(
     });
 
     await recordProviderCredentialTest(db)({
-      scopes: { tenantId, projectId },
+      scopes: { tenantId },
       id,
       status: result.success ? 'success' : 'failure',
       message: result.message,
     });
 
     return c.json(result);
+  }
+);
+
+const AvailableModelsResponseSchema = z.object({
+  data: z.array(
+    z.object({
+      provider: z.string(),
+      models: z.array(z.object({ id: z.string(), label: z.string().optional() })),
+      error: z.string().optional(),
+    })
+  ),
+});
+
+// Returns the set of models the tenant can actually pick, derived from the enabled
+// provider_credentials rows for this tenant/org.
+//
+// - Built-in providers contribute their curated lists.
+// - `custom` and `openrouter` are probed live against `<baseUrl>/models`, with a 5-min
+//   per-process cache so opening the model picker doesn't fan out every time.
+// - Probe failures don't fail the whole response — they come back as `error` per provider
+//   so the UI can show a tooltip and degrade gracefully.
+app.openapi(
+  createProtectedRoute({
+    method: 'get',
+    path: '/available-models',
+    summary: 'List Available Models',
+    operationId: 'list-available-models',
+    tags: ['Provider Credentials'],
+    permission: inheritedManageTenantAuth(),
+    request: { params: TenantParamsSchema },
+    responses: {
+      200: {
+        description: 'Per-provider list of models the tenant can call',
+        content: {
+          'application/json': { schema: AvailableModelsResponseSchema },
+        },
+      },
+      ...commonGetErrorResponses,
+    },
+  }),
+  async (c) => {
+    const db = runDbClient;
+    const { tenantId } = c.req.valid('param');
+
+    const creds = await listProviderCredentials(db)({ scopes: { tenantId } });
+    const enabled = creds.filter((cred) => cred.enabled);
+    const seenProviders = new Set<string>();
+
+    const data = await Promise.all(
+      enabled
+        .filter((cred) => {
+          if (seenProviders.has(cred.provider)) return false;
+          seenProviders.add(cred.provider);
+          return true;
+        })
+        .map(async (cred) => {
+          try {
+            const decrypted = await getProviderCredentialDecrypted(db)({
+              scopes: { tenantId },
+              provider: cred.provider,
+            });
+            if (!decrypted) {
+              return { provider: cred.provider, models: [], error: 'Credential not decryptable' };
+            }
+            const models = await discoverModelsForProvider({
+              provider: cred.provider,
+              apiKey: decrypted.apiKey,
+              baseUrl: decrypted.baseUrl,
+            });
+            return { provider: cred.provider, models };
+          } catch (err) {
+            return {
+              provider: cred.provider,
+              models: [],
+              error: (err as Error).message,
+            };
+          }
+        })
+    );
+
+    return c.json({ data });
   }
 );
 
@@ -334,8 +396,8 @@ app.openapi(
     summary: 'List Enabled Providers',
     operationId: 'list-enabled-providers',
     tags: ['Provider Credentials'],
-    permission: requireProjectPermission('view'),
-    request: { params: TenantProjectParamsSchema },
+    permission: inheritedManageTenantAuth(),
+    request: { params: TenantParamsSchema },
     responses: {
       200: {
         description: 'List of providers that have a usable credential',
@@ -351,15 +413,55 @@ app.openapi(
     },
   }),
   async (c) => {
-    const db = c.get('db');
-    const { tenantId, projectId } = c.req.valid('param');
+    const db = runDbClient;
+    const { tenantId } = c.req.valid('param');
     const creds = await listProviderCredentials(db)({
-      scopes: { tenantId, projectId },
+      scopes: { tenantId },
     });
     const providers = Array.from(
       new Set(creds.filter((c) => c.enabled).map((c) => c.provider as string))
     );
     return c.json({ data: providers });
+  }
+);
+
+// Registered AFTER the static GET routes (/available-models, /enabled-providers) so those
+// literal paths win over this `/{id}` parameter match.
+app.openapi(
+  createProtectedRoute({
+    method: 'get',
+    path: '/{id}',
+    summary: 'Get Provider Credential',
+    operationId: 'get-provider-credential',
+    tags: ['Provider Credentials'],
+    permission: inheritedManageTenantAuth(),
+    request: {
+      params: TenantIdParamsSchema,
+    },
+    responses: {
+      200: {
+        description: 'Provider credential found',
+        content: {
+          'application/json': { schema: ProviderCredentialResponseSchema },
+        },
+      },
+      ...commonGetErrorResponses,
+    },
+  }),
+  async (c) => {
+    const db = runDbClient;
+    const { tenantId, id } = c.req.valid('param');
+    const credential = await getProviderCredential(db)({
+      scopes: { tenantId },
+      id,
+    });
+    if (!credential) {
+      throw createApiError({
+        code: 'not_found',
+        message: 'Provider credential not found',
+      });
+    }
+    return c.json({ data: ProviderCredentialApiSelectSchema.parse(credential) });
   }
 );
 

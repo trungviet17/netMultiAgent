@@ -26,7 +26,6 @@ import {
   functions,
   functionTools,
   projects,
-  providerCredentials,
   subAgentArtifactComponents,
   subAgentDataComponents,
   subAgentExternalAgentRelations,
@@ -54,6 +53,7 @@ import {
   ledgerArtifacts,
   messages,
   projectMetadata,
+  providerCredentials,
   scheduledTriggerInvocations,
   scheduledTriggers,
   schedulerState,
@@ -2333,7 +2333,6 @@ export const ProviderCredentialApiSelectSchema = z
   .object({
     id: z.string(),
     tenantId: z.string(),
-    projectId: z.string(),
     provider: z.enum(ProviderCredentialProviders),
     label: z.string().nullable().optional(),
     baseUrl: z.string().nullable().optional(),

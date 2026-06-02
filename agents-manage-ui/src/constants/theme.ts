@@ -24,6 +24,7 @@ export const STATIC_LABELS = Object.freeze({
   settings: 'Settings',
   traces: 'Traces',
   credentials: 'Credentials',
+  'provider-credentials': 'Model Providers',
   components: 'Components',
   'external-agents': 'External Agents',
   'mcp-servers': 'MCP Servers',

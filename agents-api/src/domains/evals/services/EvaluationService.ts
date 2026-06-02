@@ -11,6 +11,7 @@ import {
   getFullAgent,
   getProjectScopedRef,
   ModelFactory,
+  resolveModelSettingsWithDbCredentials,
   resolveRef,
   withRef,
 } from '@inkeep/agents-core';
@@ -243,8 +244,13 @@ Return your evaluation as a JSON object matching the schema above.`;
   }): Promise<{ result: Record<string, unknown>; metadata: Record<string, unknown> }> {
     const { prompt, modelConfig, schema, tenantId, projectId, conversationId, agentId } = params;
 
-    const languageModel = ModelFactory.prepareGenerationConfig(modelConfig);
-    const providerOptions = modelConfig?.providerOptions || {};
+    const resolvedModelConfig = await resolveModelSettingsWithDbCredentials({
+      db: runDbClient,
+      scopes: { tenantId },
+      modelSettings: modelConfig,
+    });
+    const languageModel = ModelFactory.prepareGenerationConfig(resolvedModelConfig);
+    const providerOptions = resolvedModelConfig?.providerOptions || {};
 
     // Convert JSON schema to Zod schema
     let resultSchema: z.ZodType<any>;

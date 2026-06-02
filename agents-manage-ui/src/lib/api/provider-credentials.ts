@@ -13,7 +13,6 @@ export type ProviderCredentialProvider =
 export type ProviderCredential = {
   id: string;
   tenantId: string;
-  projectId: string;
   provider: ProviderCredentialProvider;
   label: string | null;
   baseUrl: string | null;
@@ -47,53 +46,58 @@ export type TestConnectionResult = {
   latencyMs?: number;
 };
 
-const base = (tenantId: string, projectId: string) =>
-  `tenants/${tenantId}/projects/${projectId}/provider-credentials`;
+// Provider credentials are tenant/org-wide (configured before/independent of any project).
+const base = (tenantId: string) => `tenants/${tenantId}/provider-credentials`;
 
-async function $fetchProviderCredentials(
-  tenantId: string,
-  projectId: string
-): Promise<ProviderCredential[]> {
-  const res = await makeManagementApiRequest<{ data: ProviderCredential[] }>(
-    base(tenantId, projectId)
-  );
+async function $fetchProviderCredentials(tenantId: string): Promise<ProviderCredential[]> {
+  const res = await makeManagementApiRequest<{ data: ProviderCredential[] }>(base(tenantId));
   return res.data;
 }
 
 export const fetchProviderCredentials = cache($fetchProviderCredentials);
 
-async function $fetchEnabledProviders(tenantId: string, projectId: string): Promise<string[]> {
+async function $fetchEnabledProviders(tenantId: string): Promise<string[]> {
   const res = await makeManagementApiRequest<{ data: string[] }>(
-    `${base(tenantId, projectId)}/enabled-providers`
+    `${base(tenantId)}/enabled-providers`
   );
   return res.data;
 }
 
 export const fetchEnabledProviders = cache($fetchEnabledProviders);
 
+export type AvailableProviderModels = {
+  provider: string;
+  models: { id: string; label?: string }[];
+  error?: string;
+};
+
+async function $fetchAvailableModels(tenantId: string): Promise<AvailableProviderModels[]> {
+  const res = await makeManagementApiRequest<{ data: AvailableProviderModels[] }>(
+    `${base(tenantId)}/available-models`
+  );
+  return res.data;
+}
+
+export const fetchAvailableModels = cache($fetchAvailableModels);
+
 export async function createProviderCredential(
   tenantId: string,
-  projectId: string,
   body: ProviderCredentialInput
 ): Promise<ProviderCredential> {
-  const res = await makeManagementApiRequest<{ data: ProviderCredential }>(
-    base(tenantId, projectId),
-    {
-      method: 'POST',
-      body: JSON.stringify(body),
-    }
-  );
+  const res = await makeManagementApiRequest<{ data: ProviderCredential }>(base(tenantId), {
+    method: 'POST',
+    body: JSON.stringify(body),
+  });
   return res.data;
 }
 
 export async function updateProviderCredential(
   tenantId: string,
-  projectId: string,
   id: string,
   body: ProviderCredentialUpdateInput
 ): Promise<ProviderCredential> {
   const res = await makeManagementApiRequest<{ data: ProviderCredential }>(
-    `${base(tenantId, projectId)}/${id}`,
+    `${base(tenantId)}/${id}`,
     {
       method: 'PATCH',
       body: JSON.stringify(body),
@@ -102,22 +106,17 @@ export async function updateProviderCredential(
   return res.data;
 }
 
-export async function deleteProviderCredential(
-  tenantId: string,
-  projectId: string,
-  id: string
-): Promise<void> {
-  await makeManagementApiRequest<void>(`${base(tenantId, projectId)}/${id}`, {
+export async function deleteProviderCredential(tenantId: string, id: string): Promise<void> {
+  await makeManagementApiRequest<void>(`${base(tenantId)}/${id}`, {
     method: 'DELETE',
   });
 }
 
 export async function testProviderCredential(
   tenantId: string,
-  projectId: string,
   body: { provider: ProviderCredentialProvider; apiKey: string; baseUrl?: string }
 ): Promise<TestConnectionResult> {
-  return makeManagementApiRequest<TestConnectionResult>(`${base(tenantId, projectId)}/test`, {
+  return makeManagementApiRequest<TestConnectionResult>(`${base(tenantId)}/test`, {
     method: 'POST',
     body: JSON.stringify(body),
   });
@@ -125,10 +124,9 @@ export async function testProviderCredential(
 
 export async function testStoredProviderCredential(
   tenantId: string,
-  projectId: string,
   id: string
 ): Promise<TestConnectionResult> {
-  return makeManagementApiRequest<TestConnectionResult>(`${base(tenantId, projectId)}/${id}/test`, {
+  return makeManagementApiRequest<TestConnectionResult>(`${base(tenantId)}/${id}/test`, {
     method: 'POST',
   });
 }

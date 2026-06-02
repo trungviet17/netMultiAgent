@@ -12,6 +12,7 @@ import {
   isUniqueConstraintError,
   type ModelSettings,
   type Part,
+  resolveModelSettingsWithDbCredentials,
   type SendMessageResponse,
   setSpanWithError,
   unwrapError,
@@ -151,6 +152,26 @@ export class ExecutionHandler {
           );
           baseModel = firstWithModel(agent.models?.base, project.models?.base);
         }
+
+        // Inject DB-backed provider credentials so status-update generations work for
+        // custom/openrouter providers that rely on the credential row for baseURL + apiKey.
+        // Mirrors the resolution applied to the primary generation path in createTaskHandlerConfig.
+        [summarizerModel, baseModel] = await Promise.all([
+          summarizerModel
+            ? resolveModelSettingsWithDbCredentials({
+                db: runDbClient,
+                scopes: { tenantId },
+                modelSettings: summarizerModel,
+              })
+            : undefined,
+          baseModel
+            ? resolveModelSettingsWithDbCredentials({
+                db: runDbClient,
+                scopes: { tenantId },
+                modelSettings: baseModel,
+              })
+            : undefined,
+        ]);
 
         // Initialize status updates (always call to set models, but only enable events if configured)
         const statusConfig =

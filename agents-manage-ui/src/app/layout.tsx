@@ -19,7 +19,7 @@ const jetBrainsMono = JetBrains_Mono({
   subsets: ['latin'],
 });
 
-const APP_NAME = 'Inkeep Agents';
+const APP_NAME = 'netMultiAgent';
 
 const inter = Inter({
   display: 'swap',
@@ -33,8 +33,8 @@ export const metadata: Metadata = {
     template: `%s | ${APP_NAME}`,
   },
   description:
-    "Inkeep's multi-agent framework enables multiple specialized AI agents to collaborate and solve complex problems through an agent-based architecture. You can define networks of agents, each with unique instructions, tools, and purposes.",
-  keywords: ['agents', 'ai', 'framework', 'sdk', 'inkeep'],
+    'netMultiAgent is a multi-agent framework that enables multiple specialized AI agents to collaborate and solve complex problems through an agent-based architecture. You can define networks of agents, each with unique instructions, tools, and purposes.',
+  keywords: ['agents', 'ai', 'framework', 'sdk', 'netmultiagent'],
   generator: 'Next.js',
   applicationName: APP_NAME,
   appleWebApp: {

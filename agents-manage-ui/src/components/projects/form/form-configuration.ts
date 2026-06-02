@@ -1,25 +1,23 @@
-import {
-  DEFAULT_ANTHROPIC_BASE_MODEL,
-  DEFAULT_ANTHROPIC_STRUCTURED_OUTPUT_MODEL,
-  DEFAULT_ANTHROPIC_SUMMARIZER_MODEL,
-} from '@/components/agent/configuration/model-options';
 import type { ProjectFormData } from './validation';
 
+// Models are no longer pre-filled with a hardcoded provider default. The base model
+// is a required field, so the user must pick from the providers configured at the org
+// level (Model Providers). structuredOutput/summarizer inherit from base when left empty.
 export const defaultValues: ProjectFormData = {
   id: '',
   name: '',
   description: '',
   models: {
     base: {
-      model: DEFAULT_ANTHROPIC_BASE_MODEL,
+      model: '',
       providerOptions: undefined,
     },
     structuredOutput: {
-      model: DEFAULT_ANTHROPIC_STRUCTURED_OUTPUT_MODEL,
+      model: '',
       providerOptions: undefined,
     },
     summarizer: {
-      model: DEFAULT_ANTHROPIC_SUMMARIZER_MODEL,
+      model: '',
       providerOptions: undefined,
     },
   },

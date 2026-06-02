@@ -93,7 +93,8 @@ app.route('/projects/:projectId/agents/:agentId/context-configs', contextConfigs
 app.route('/projects/:projectId/conversations', conversationsRoutes);
 app.route('/projects/:projectId/credentials', credentialsRoutes);
 app.route('/projects/:projectId/credential-stores', credentialStoresRoutes);
-app.route('/projects/:projectId/provider-credentials', providerCredentialsRoutes);
+// Provider credentials are tenant/org-wide (not project-scoped): full path /tenants/:tenantId/provider-credentials
+app.route('/provider-credentials', providerCredentialsRoutes);
 app.route('/projects/:projectId/data-components', dataComponentsRoutes);
 app.route('/projects/:projectId/external-agents', externalAgentsRoutes);
 app.route('/projects/:projectId/agents/:agentId/function-tools', functionToolsRoutes);

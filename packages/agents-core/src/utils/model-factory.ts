@@ -84,13 +84,22 @@ export class ModelFactory {
             'Custom provider requires baseURL. Please provide it in providerOptions.baseURL or providerOptions.baseUrl'
           );
         }
+        // An explicit apiKey (from the DB-backed provider credential or providerOptions) is the
+        // source of truth. The legacy global CUSTOM_LLM_API_KEY env var is ONLY a fallback for
+        // when no apiKey was provided. Injecting it unconditionally as an Authorization header
+        // silently shadows the credential's apiKey: @ai-sdk/openai-compatible builds headers as
+        // `{ ...apiKey && { Authorization }, ...headers }`, spreading `headers` AFTER the
+        // apiKey-derived Authorization — so a stale env key wins and breaks per-provider
+        // credentials (e.g. an OpenRouter env key getting sent to a custom netMind gateway).
+        const hasExplicitApiKey = typeof config.apiKey === 'string' && config.apiKey.length > 0;
         const customConfig = {
           name: 'custom',
           baseURL: (config.baseURL || config.baseUrl) as string,
           headers: {
-            ...(process.env.CUSTOM_LLM_API_KEY && {
-              Authorization: `Bearer ${process.env.CUSTOM_LLM_API_KEY}`,
-            }),
+            ...(!hasExplicitApiKey &&
+              process.env.CUSTOM_LLM_API_KEY && {
+                Authorization: `Bearer ${process.env.CUSTOM_LLM_API_KEY}`,
+              }),
             ...((config as any).headers || {}),
           },
           ...config,
@@ -99,8 +108,11 @@ export class ModelFactory {
           {
             config: {
               baseURL: customConfig.baseURL,
-              hasApiKey: !!process.env.CUSTOM_LLM_API_KEY,
-              apiKeyPrefix: `${process.env.CUSTOM_LLM_API_KEY?.substring(0, 10)}...`,
+              apiKeySource: hasExplicitApiKey
+                ? 'credential'
+                : process.env.CUSTOM_LLM_API_KEY
+                  ? 'env'
+                  : 'none',
               headers: Object.keys(customConfig.headers || {}),
             },
           },

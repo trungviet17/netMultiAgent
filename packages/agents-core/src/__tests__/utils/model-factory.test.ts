@@ -166,20 +166,23 @@ describe('ModelFactory', () => {
       expect(errors).toContain('Model name is required');
     });
 
-    test('should return errors for API key in provider options', () => {
+    test('allows apiKey in provider options (transient runtime injection from credential store)', () => {
       const config: ModelSettings = {
         model: 'azure/my-deployment',
         providerOptions: {
           resourceName: 'my-resource',
-          apiKey: 'should-not-be-here',
+          apiKey: 'injected-at-runtime',
         },
       };
 
       const errors = ModelFactory.validateConfig(config);
-      expect(errors).toContain(
+      // apiKey is intentionally permitted here: the DB-backed provider-credentials store
+      // injects it at runtime. Persisted project configs still avoid it (the Manage API strips it).
+      expect(errors).not.toContain(
         'API keys should not be stored in provider options. ' +
           'Use environment variables (ANTHROPIC_API_KEY, OPENAI_API_KEY) or credential store instead.'
       );
+      expect(errors).toHaveLength(0);
     });
 
     test('should return errors for invalid maxDuration', () => {

@@ -27,7 +27,6 @@ import {
 
 type Props = {
   tenantId: string;
-  projectId: string;
   initial: ProviderCredential[];
   canEdit: boolean;
 };
@@ -40,7 +39,7 @@ const PROVIDER_OPTIONS: { value: ProviderCredentialProvider; label: string }[] =
   { value: 'custom', label: 'Custom (OpenAI-compatible)' },
 ];
 
-export function ProviderCredentialsManager({ tenantId, projectId, initial, canEdit }: Props) {
+export function ProviderCredentialsManager({ tenantId, initial, canEdit }: Props) {
   const router = useRouter();
   const [credentials, setCredentials] = useState<ProviderCredential[]>(initial);
   const [showForm, setShowForm] = useState(false);
@@ -70,7 +69,7 @@ export function ProviderCredentialsManager({ tenantId, projectId, initial, canEd
     }
     setTesting(true);
     try {
-      const res = await testProviderCredential(tenantId, projectId, {
+      const res = await testProviderCredential(tenantId, {
         provider,
         apiKey,
         baseUrl: provider === 'custom' ? baseUrl : undefined,
@@ -97,7 +96,7 @@ export function ProviderCredentialsManager({ tenantId, projectId, initial, canEd
     startTransition(async () => {
       try {
         // Test before save so users get clear feedback.
-        const test = await testProviderCredential(tenantId, projectId, {
+        const test = await testProviderCredential(tenantId, {
           provider,
           apiKey,
           baseUrl: provider === 'custom' ? baseUrl : undefined,
@@ -107,7 +106,7 @@ export function ProviderCredentialsManager({ tenantId, projectId, initial, canEd
           return;
         }
 
-        const created = await createProviderCredential(tenantId, projectId, {
+        const created = await createProviderCredential(tenantId, {
           provider,
           apiKey,
           label: label || undefined,
@@ -125,7 +124,7 @@ export function ProviderCredentialsManager({ tenantId, projectId, initial, canEd
 
   const onToggleEnabled = async (cred: ProviderCredential, enabled: boolean) => {
     try {
-      const updated = await updateProviderCredential(tenantId, projectId, cred.id, { enabled });
+      const updated = await updateProviderCredential(tenantId, cred.id, { enabled });
       setCredentials((prev) => prev.map((c) => (c.id === updated.id ? updated : c)));
       router.refresh();
     } catch (e) {
@@ -136,7 +135,7 @@ export function ProviderCredentialsManager({ tenantId, projectId, initial, canEd
   const onDelete = async (cred: ProviderCredential) => {
     if (!confirm(`Delete ${cred.provider} credential?`)) return;
     try {
-      await deleteProviderCredential(tenantId, projectId, cred.id);
+      await deleteProviderCredential(tenantId, cred.id);
       setCredentials((prev) => prev.filter((c) => c.id !== cred.id));
       toast.success('Deleted');
       router.refresh();
@@ -147,7 +146,7 @@ export function ProviderCredentialsManager({ tenantId, projectId, initial, canEd
 
   const onTestStored = async (cred: ProviderCredential) => {
     try {
-      const res = await testStoredProviderCredential(tenantId, projectId, cred.id);
+      const res = await testStoredProviderCredential(tenantId, cred.id);
       if (res.success) toast.success(res.message);
       else toast.error(res.message);
       // refresh to show new lastTestStatus
@@ -246,7 +245,8 @@ export function ProviderCredentialsManager({ tenantId, projectId, initial, canEd
       <div className="flex flex-col gap-2">
         {credentials.length === 0 && (
           <div className="text-sm text-muted-foreground">
-            No provider credentials yet. Add one to enable that provider's models in this project.
+            No provider credentials yet. Add one to enable that provider's models across this
+            organization.
           </div>
         )}
         {credentials.map((cred) => (

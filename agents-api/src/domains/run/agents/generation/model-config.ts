@@ -3,7 +3,7 @@ import {
   type ModelSettings,
   resolveModelSettingsWithDbCredentials,
 } from '@inkeep/agents-core';
-import manageDbClient from '../../../../data/db/manageDbClient';
+import runDbClient from '../../../../data/db/runDbClient';
 import { getLogger } from '../../../../logger';
 import {
   AGENT_EXECUTION_MAX_GENERATION_STEPS,
@@ -102,8 +102,8 @@ export async function configureModelSettings(ctx: AgentRunContext): Promise<{
     : getPrimaryModel(ctx.config);
 
   const primaryModelSettings = await resolveModelSettingsWithDbCredentials({
-    db: manageDbClient,
-    scopes: { tenantId: ctx.config.tenantId, projectId: ctx.config.projectId },
+    db: runDbClient,
+    scopes: { tenantId: ctx.config.tenantId },
     modelSettings: rawPrimaryModelSettings,
   });
 

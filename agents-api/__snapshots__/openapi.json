@@ -7996,9 +7996,6 @@
             "nullable": true,
             "type": "string"
           },
-          "projectId": {
-            "type": "string"
-          },
           "provider": {
             "enum": [
               "anthropic",
@@ -8019,7 +8016,6 @@
         "required": [
           "id",
           "tenantId",
-          "projectId",
           "provider",
           "enabled",
           "keyPreview",
@@ -45636,865 +45632,6 @@
         }
       }
     },
-    "/manage/tenants/{tenantId}/projects/{projectId}/provider-credentials": {
-      "get": {
-        "operationId": "list-provider-credentials",
-        "parameters": [
-          {
-            "description": "Tenant identifier",
-            "in": "path",
-            "name": "tenantId",
-            "required": true,
-            "schema": {
-              "$ref": "#/components/schemas/TenantIdPathParam"
-            }
-          },
-          {
-            "description": "Project identifier",
-            "in": "path",
-            "name": "projectId",
-            "required": true,
-            "schema": {
-              "$ref": "#/components/schemas/ProjectIdPathParam"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ProviderCredentialListResponse"
-                }
-              }
-            },
-            "description": "List of provider credentials retrieved successfully"
-          },
-          "400": {
-            "content": {
-              "application/problem+json": {
-                "schema": {
-                  "$ref": "#/components/schemas/BadRequest"
-                }
-              }
-            },
-            "description": "Bad Request"
-          },
-          "401": {
-            "content": {
-              "application/problem+json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Unauthorized"
-                }
-              }
-            },
-            "description": "Unauthorized"
-          },
-          "403": {
-            "content": {
-              "application/problem+json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Forbidden"
-                }
-              }
-            },
-            "description": "Forbidden"
-          },
-          "404": {
-            "content": {
-              "application/problem+json": {
-                "schema": {
-                  "$ref": "#/components/schemas/NotFound"
-                }
-              }
-            },
-            "description": "Not Found"
-          },
-          "422": {
-            "content": {
-              "application/problem+json": {
-                "schema": {
-                  "$ref": "#/components/schemas/UnprocessableEntity"
-                }
-              }
-            },
-            "description": "Unprocessable Entity"
-          },
-          "500": {
-            "content": {
-              "application/problem+json": {
-                "schema": {
-                  "$ref": "#/components/schemas/InternalServerError"
-                }
-              }
-            },
-            "description": "Internal Server Error"
-          }
-        },
-        "summary": "List Provider Credentials",
-        "tags": [
-          "Provider Credentials"
-        ],
-        "x-authz": {
-          "description": "Requires project view permission (project_viewer+, or org admin/owner)",
-          "permission": "view",
-          "resource": "project"
-        }
-      },
-      "post": {
-        "operationId": "create-provider-credential",
-        "parameters": [
-          {
-            "description": "Tenant identifier",
-            "in": "path",
-            "name": "tenantId",
-            "required": true,
-            "schema": {
-              "$ref": "#/components/schemas/TenantIdPathParam"
-            }
-          },
-          {
-            "description": "Project identifier",
-            "in": "path",
-            "name": "projectId",
-            "required": true,
-            "schema": {
-              "$ref": "#/components/schemas/ProjectIdPathParam"
-            }
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/ProviderCredentialCreate"
-              }
-            }
-          }
-        },
-        "responses": {
-          "201": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ProviderCredentialResponse"
-                }
-              }
-            },
-            "description": "Provider credential created"
-          },
-          "400": {
-            "content": {
-              "application/problem+json": {
-                "schema": {
-                  "$ref": "#/components/schemas/BadRequest"
-                }
-              }
-            },
-            "description": "Bad Request"
-          },
-          "401": {
-            "content": {
-              "application/problem+json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Unauthorized"
-                }
-              }
-            },
-            "description": "Unauthorized"
-          },
-          "403": {
-            "content": {
-              "application/problem+json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Forbidden"
-                }
-              }
-            },
-            "description": "Forbidden"
-          },
-          "404": {
-            "content": {
-              "application/problem+json": {
-                "schema": {
-                  "$ref": "#/components/schemas/NotFound"
-                }
-              }
-            },
-            "description": "Not Found"
-          },
-          "422": {
-            "content": {
-              "application/problem+json": {
-                "schema": {
-                  "$ref": "#/components/schemas/UnprocessableEntity"
-                }
-              }
-            },
-            "description": "Unprocessable Entity"
-          },
-          "500": {
-            "content": {
-              "application/problem+json": {
-                "schema": {
-                  "$ref": "#/components/schemas/InternalServerError"
-                }
-              }
-            },
-            "description": "Internal Server Error"
-          }
-        },
-        "summary": "Create Provider Credential",
-        "tags": [
-          "Provider Credentials"
-        ],
-        "x-authz": {
-          "description": "Requires project edit permission (project_admin, or org admin/owner)",
-          "permission": "edit",
-          "resource": "project"
-        }
-      }
-    },
-    "/manage/tenants/{tenantId}/projects/{projectId}/provider-credentials/enabled-providers": {
-      "get": {
-        "operationId": "list-enabled-providers",
-        "parameters": [
-          {
-            "description": "Tenant identifier",
-            "in": "path",
-            "name": "tenantId",
-            "required": true,
-            "schema": {
-              "$ref": "#/components/schemas/TenantIdPathParam"
-            }
-          },
-          {
-            "description": "Project identifier",
-            "in": "path",
-            "name": "projectId",
-            "required": true,
-            "schema": {
-              "$ref": "#/components/schemas/ProjectIdPathParam"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "properties": {
-                    "data": {
-                      "items": {
-                        "type": "string"
-                      },
-                      "type": "array"
-                    }
-                  },
-                  "required": [
-                    "data"
-                  ],
-                  "type": "object"
-                }
-              }
-            },
-            "description": "List of providers that have a usable credential"
-          },
-          "400": {
-            "content": {
-              "application/problem+json": {
-                "schema": {
-                  "$ref": "#/components/schemas/BadRequest"
-                }
-              }
-            },
-            "description": "Bad Request"
-          },
-          "401": {
-            "content": {
-              "application/problem+json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Unauthorized"
-                }
-              }
-            },
-            "description": "Unauthorized"
-          },
-          "403": {
-            "content": {
-              "application/problem+json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Forbidden"
-                }
-              }
-            },
-            "description": "Forbidden"
-          },
-          "404": {
-            "content": {
-              "application/problem+json": {
-                "schema": {
-                  "$ref": "#/components/schemas/NotFound"
-                }
-              }
-            },
-            "description": "Not Found"
-          },
-          "422": {
-            "content": {
-              "application/problem+json": {
-                "schema": {
-                  "$ref": "#/components/schemas/UnprocessableEntity"
-                }
-              }
-            },
-            "description": "Unprocessable Entity"
-          },
-          "500": {
-            "content": {
-              "application/problem+json": {
-                "schema": {
-                  "$ref": "#/components/schemas/InternalServerError"
-                }
-              }
-            },
-            "description": "Internal Server Error"
-          }
-        },
-        "summary": "List Enabled Providers",
-        "tags": [
-          "Provider Credentials"
-        ],
-        "x-authz": {
-          "description": "Requires project view permission (project_viewer+, or org admin/owner)",
-          "permission": "view",
-          "resource": "project"
-        }
-      }
-    },
-    "/manage/tenants/{tenantId}/projects/{projectId}/provider-credentials/test": {
-      "post": {
-        "operationId": "test-provider-credential",
-        "parameters": [
-          {
-            "description": "Tenant identifier",
-            "in": "path",
-            "name": "tenantId",
-            "required": true,
-            "schema": {
-              "$ref": "#/components/schemas/TenantIdPathParam"
-            }
-          },
-          {
-            "description": "Project identifier",
-            "in": "path",
-            "name": "projectId",
-            "required": true,
-            "schema": {
-              "$ref": "#/components/schemas/ProjectIdPathParam"
-            }
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/ProviderCredentialTestRequest"
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ProviderCredentialTestResponse"
-                }
-              }
-            },
-            "description": "Test result"
-          },
-          "400": {
-            "content": {
-              "application/problem+json": {
-                "schema": {
-                  "$ref": "#/components/schemas/BadRequest"
-                }
-              }
-            },
-            "description": "Bad Request"
-          },
-          "401": {
-            "content": {
-              "application/problem+json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Unauthorized"
-                }
-              }
-            },
-            "description": "Unauthorized"
-          },
-          "403": {
-            "content": {
-              "application/problem+json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Forbidden"
-                }
-              }
-            },
-            "description": "Forbidden"
-          },
-          "404": {
-            "content": {
-              "application/problem+json": {
-                "schema": {
-                  "$ref": "#/components/schemas/NotFound"
-                }
-              }
-            },
-            "description": "Not Found"
-          },
-          "422": {
-            "content": {
-              "application/problem+json": {
-                "schema": {
-                  "$ref": "#/components/schemas/UnprocessableEntity"
-                }
-              }
-            },
-            "description": "Unprocessable Entity"
-          },
-          "500": {
-            "content": {
-              "application/problem+json": {
-                "schema": {
-                  "$ref": "#/components/schemas/InternalServerError"
-                }
-              }
-            },
-            "description": "Internal Server Error"
-          }
-        },
-        "summary": "Test Provider Credentials",
-        "tags": [
-          "Provider Credentials"
-        ],
-        "x-authz": {
-          "description": "Requires project edit permission (project_admin, or org admin/owner)",
-          "permission": "edit",
-          "resource": "project"
-        }
-      }
-    },
-    "/manage/tenants/{tenantId}/projects/{projectId}/provider-credentials/{id}": {
-      "delete": {
-        "operationId": "delete-provider-credential",
-        "parameters": [
-          {
-            "description": "Tenant identifier",
-            "in": "path",
-            "name": "tenantId",
-            "required": true,
-            "schema": {
-              "$ref": "#/components/schemas/TenantIdPathParam"
-            }
-          },
-          {
-            "description": "Project identifier",
-            "in": "path",
-            "name": "projectId",
-            "required": true,
-            "schema": {
-              "$ref": "#/components/schemas/ProjectIdPathParam"
-            }
-          },
-          {
-            "description": "Resource identifier",
-            "in": "path",
-            "name": "id",
-            "required": true,
-            "schema": {
-              "$ref": "#/components/schemas/ResourceId"
-            }
-          }
-        ],
-        "responses": {
-          "204": {
-            "description": "Deleted"
-          },
-          "404": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            },
-            "description": "Provider credential not found"
-          }
-        },
-        "summary": "Delete Provider Credential",
-        "tags": [
-          "Provider Credentials"
-        ],
-        "x-authz": {
-          "description": "Requires project edit permission (project_admin, or org admin/owner)",
-          "permission": "edit",
-          "resource": "project"
-        }
-      },
-      "get": {
-        "operationId": "get-provider-credential",
-        "parameters": [
-          {
-            "description": "Tenant identifier",
-            "in": "path",
-            "name": "tenantId",
-            "required": true,
-            "schema": {
-              "$ref": "#/components/schemas/TenantIdPathParam"
-            }
-          },
-          {
-            "description": "Project identifier",
-            "in": "path",
-            "name": "projectId",
-            "required": true,
-            "schema": {
-              "$ref": "#/components/schemas/ProjectIdPathParam"
-            }
-          },
-          {
-            "description": "Resource identifier",
-            "in": "path",
-            "name": "id",
-            "required": true,
-            "schema": {
-              "$ref": "#/components/schemas/ResourceId"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ProviderCredentialResponse"
-                }
-              }
-            },
-            "description": "Provider credential found"
-          },
-          "400": {
-            "content": {
-              "application/problem+json": {
-                "schema": {
-                  "$ref": "#/components/schemas/BadRequest"
-                }
-              }
-            },
-            "description": "Bad Request"
-          },
-          "401": {
-            "content": {
-              "application/problem+json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Unauthorized"
-                }
-              }
-            },
-            "description": "Unauthorized"
-          },
-          "403": {
-            "content": {
-              "application/problem+json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Forbidden"
-                }
-              }
-            },
-            "description": "Forbidden"
-          },
-          "404": {
-            "content": {
-              "application/problem+json": {
-                "schema": {
-                  "$ref": "#/components/schemas/NotFound"
-                }
-              }
-            },
-            "description": "Not Found"
-          },
-          "422": {
-            "content": {
-              "application/problem+json": {
-                "schema": {
-                  "$ref": "#/components/schemas/UnprocessableEntity"
-                }
-              }
-            },
-            "description": "Unprocessable Entity"
-          },
-          "500": {
-            "content": {
-              "application/problem+json": {
-                "schema": {
-                  "$ref": "#/components/schemas/InternalServerError"
-                }
-              }
-            },
-            "description": "Internal Server Error"
-          }
-        },
-        "summary": "Get Provider Credential",
-        "tags": [
-          "Provider Credentials"
-        ],
-        "x-authz": {
-          "description": "Requires project view permission (project_viewer+, or org admin/owner)",
-          "permission": "view",
-          "resource": "project"
-        }
-      },
-      "patch": {
-        "operationId": "update-provider-credential",
-        "parameters": [
-          {
-            "description": "Tenant identifier",
-            "in": "path",
-            "name": "tenantId",
-            "required": true,
-            "schema": {
-              "$ref": "#/components/schemas/TenantIdPathParam"
-            }
-          },
-          {
-            "description": "Project identifier",
-            "in": "path",
-            "name": "projectId",
-            "required": true,
-            "schema": {
-              "$ref": "#/components/schemas/ProjectIdPathParam"
-            }
-          },
-          {
-            "description": "Resource identifier",
-            "in": "path",
-            "name": "id",
-            "required": true,
-            "schema": {
-              "$ref": "#/components/schemas/ResourceId"
-            }
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/ProviderCredentialUpdate"
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ProviderCredentialResponse"
-                }
-              }
-            },
-            "description": "Provider credential updated"
-          },
-          "400": {
-            "content": {
-              "application/problem+json": {
-                "schema": {
-                  "$ref": "#/components/schemas/BadRequest"
-                }
-              }
-            },
-            "description": "Bad Request"
-          },
-          "401": {
-            "content": {
-              "application/problem+json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Unauthorized"
-                }
-              }
-            },
-            "description": "Unauthorized"
-          },
-          "403": {
-            "content": {
-              "application/problem+json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Forbidden"
-                }
-              }
-            },
-            "description": "Forbidden"
-          },
-          "404": {
-            "content": {
-              "application/problem+json": {
-                "schema": {
-                  "$ref": "#/components/schemas/NotFound"
-                }
-              }
-            },
-            "description": "Not Found"
-          },
-          "422": {
-            "content": {
-              "application/problem+json": {
-                "schema": {
-                  "$ref": "#/components/schemas/UnprocessableEntity"
-                }
-              }
-            },
-            "description": "Unprocessable Entity"
-          },
-          "500": {
-            "content": {
-              "application/problem+json": {
-                "schema": {
-                  "$ref": "#/components/schemas/InternalServerError"
-                }
-              }
-            },
-            "description": "Internal Server Error"
-          }
-        },
-        "summary": "Update Provider Credential",
-        "tags": [
-          "Provider Credentials"
-        ],
-        "x-authz": {
-          "description": "Requires project edit permission (project_admin, or org admin/owner)",
-          "permission": "edit",
-          "resource": "project"
-        }
-      }
-    },
-    "/manage/tenants/{tenantId}/projects/{projectId}/provider-credentials/{id}/test": {
-      "post": {
-        "operationId": "test-stored-provider-credential",
-        "parameters": [
-          {
-            "description": "Tenant identifier",
-            "in": "path",
-            "name": "tenantId",
-            "required": true,
-            "schema": {
-              "$ref": "#/components/schemas/TenantIdPathParam"
-            }
-          },
-          {
-            "description": "Project identifier",
-            "in": "path",
-            "name": "projectId",
-            "required": true,
-            "schema": {
-              "$ref": "#/components/schemas/ProjectIdPathParam"
-            }
-          },
-          {
-            "description": "Resource identifier",
-            "in": "path",
-            "name": "id",
-            "required": true,
-            "schema": {
-              "$ref": "#/components/schemas/ResourceId"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ProviderCredentialTestResponse"
-                }
-              }
-            },
-            "description": "Test result"
-          },
-          "400": {
-            "content": {
-              "application/problem+json": {
-                "schema": {
-                  "$ref": "#/components/schemas/BadRequest"
-                }
-              }
-            },
-            "description": "Bad Request"
-          },
-          "401": {
-            "content": {
-              "application/problem+json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Unauthorized"
-                }
-              }
-            },
-            "description": "Unauthorized"
-          },
-          "403": {
-            "content": {
-              "application/problem+json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Forbidden"
-                }
-              }
-            },
-            "description": "Forbidden"
-          },
-          "404": {
-            "content": {
-              "application/problem+json": {
-                "schema": {
-                  "$ref": "#/components/schemas/NotFound"
-                }
-              }
-            },
-            "description": "Not Found"
-          },
-          "422": {
-            "content": {
-              "application/problem+json": {
-                "schema": {
-                  "$ref": "#/components/schemas/UnprocessableEntity"
-                }
-              }
-            },
-            "description": "Unprocessable Entity"
-          },
-          "500": {
-            "content": {
-              "application/problem+json": {
-                "schema": {
-                  "$ref": "#/components/schemas/InternalServerError"
-                }
-              }
-            },
-            "description": "Internal Server Error"
-          }
-        },
-        "summary": "Test Stored Provider Credential",
-        "tags": [
-          "Provider Credentials"
-        ],
-        "x-authz": {
-          "description": "Requires project edit permission (project_admin, or org admin/owner)",
-          "permission": "edit",
-          "resource": "project"
-        }
-      }
-    },
     "/manage/tenants/{tenantId}/projects/{projectId}/refs/resolve": {
       "get": {
         "description": "Resolve a ref string (branch name, tag name, or commit hash) to its full resolved ref with type and commit hash. Pass the ref as a query parameter.",
@@ -50183,6 +49320,930 @@
           "description": "Requires project edit permission (project_admin, or org admin/owner)",
           "permission": "edit",
           "resource": "project"
+        }
+      }
+    },
+    "/manage/tenants/{tenantId}/provider-credentials": {
+      "get": {
+        "operationId": "list-provider-credentials",
+        "parameters": [
+          {
+            "description": "Tenant identifier",
+            "in": "path",
+            "name": "tenantId",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/TenantIdPathParam"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProviderCredentialListResponse"
+                }
+              }
+            },
+            "description": "List of provider credentials retrieved successfully"
+          },
+          "400": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BadRequest"
+                }
+              }
+            },
+            "description": "Bad Request"
+          },
+          "401": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Unauthorized"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "403": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Forbidden"
+                }
+              }
+            },
+            "description": "Forbidden"
+          },
+          "404": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/NotFound"
+                }
+              }
+            },
+            "description": "Not Found"
+          },
+          "422": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UnprocessableEntity"
+                }
+              }
+            },
+            "description": "Unprocessable Entity"
+          },
+          "500": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InternalServerError"
+                }
+              }
+            },
+            "description": "Internal Server Error"
+          }
+        },
+        "summary": "List Provider Credentials",
+        "tags": [
+          "Provider Credentials"
+        ],
+        "x-authz": {
+          "description": "Requires organization membership. Auth is enforced by the manageBearerOrSessionAuth middleware in createApp.ts.",
+          "permission": "member",
+          "resource": "organization"
+        }
+      },
+      "post": {
+        "operationId": "create-provider-credential",
+        "parameters": [
+          {
+            "description": "Tenant identifier",
+            "in": "path",
+            "name": "tenantId",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/TenantIdPathParam"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ProviderCredentialCreate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProviderCredentialResponse"
+                }
+              }
+            },
+            "description": "Provider credential created"
+          },
+          "400": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BadRequest"
+                }
+              }
+            },
+            "description": "Bad Request"
+          },
+          "401": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Unauthorized"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "403": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Forbidden"
+                }
+              }
+            },
+            "description": "Forbidden"
+          },
+          "404": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/NotFound"
+                }
+              }
+            },
+            "description": "Not Found"
+          },
+          "422": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UnprocessableEntity"
+                }
+              }
+            },
+            "description": "Unprocessable Entity"
+          },
+          "500": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InternalServerError"
+                }
+              }
+            },
+            "description": "Internal Server Error"
+          }
+        },
+        "summary": "Create Provider Credential",
+        "tags": [
+          "Provider Credentials"
+        ],
+        "x-authz": {
+          "description": "Requires organization membership. Auth is enforced by the manageBearerOrSessionAuth middleware in createApp.ts.",
+          "permission": "member",
+          "resource": "organization"
+        }
+      }
+    },
+    "/manage/tenants/{tenantId}/provider-credentials/available-models": {
+      "get": {
+        "operationId": "list-available-models",
+        "parameters": [
+          {
+            "description": "Tenant identifier",
+            "in": "path",
+            "name": "tenantId",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/TenantIdPathParam"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "data": {
+                      "items": {
+                        "properties": {
+                          "error": {
+                            "type": "string"
+                          },
+                          "models": {
+                            "items": {
+                              "properties": {
+                                "id": {
+                                  "type": "string"
+                                },
+                                "label": {
+                                  "type": "string"
+                                }
+                              },
+                              "required": [
+                                "id"
+                              ],
+                              "type": "object"
+                            },
+                            "type": "array"
+                          },
+                          "provider": {
+                            "type": "string"
+                          }
+                        },
+                        "required": [
+                          "provider",
+                          "models"
+                        ],
+                        "type": "object"
+                      },
+                      "type": "array"
+                    }
+                  },
+                  "required": [
+                    "data"
+                  ],
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Per-provider list of models the tenant can call"
+          },
+          "400": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BadRequest"
+                }
+              }
+            },
+            "description": "Bad Request"
+          },
+          "401": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Unauthorized"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "403": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Forbidden"
+                }
+              }
+            },
+            "description": "Forbidden"
+          },
+          "404": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/NotFound"
+                }
+              }
+            },
+            "description": "Not Found"
+          },
+          "422": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UnprocessableEntity"
+                }
+              }
+            },
+            "description": "Unprocessable Entity"
+          },
+          "500": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InternalServerError"
+                }
+              }
+            },
+            "description": "Internal Server Error"
+          }
+        },
+        "summary": "List Available Models",
+        "tags": [
+          "Provider Credentials"
+        ],
+        "x-authz": {
+          "description": "Requires organization membership. Auth is enforced by the manageBearerOrSessionAuth middleware in createApp.ts.",
+          "permission": "member",
+          "resource": "organization"
+        }
+      }
+    },
+    "/manage/tenants/{tenantId}/provider-credentials/enabled-providers": {
+      "get": {
+        "operationId": "list-enabled-providers",
+        "parameters": [
+          {
+            "description": "Tenant identifier",
+            "in": "path",
+            "name": "tenantId",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/TenantIdPathParam"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "data": {
+                      "items": {
+                        "type": "string"
+                      },
+                      "type": "array"
+                    }
+                  },
+                  "required": [
+                    "data"
+                  ],
+                  "type": "object"
+                }
+              }
+            },
+            "description": "List of providers that have a usable credential"
+          },
+          "400": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BadRequest"
+                }
+              }
+            },
+            "description": "Bad Request"
+          },
+          "401": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Unauthorized"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "403": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Forbidden"
+                }
+              }
+            },
+            "description": "Forbidden"
+          },
+          "404": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/NotFound"
+                }
+              }
+            },
+            "description": "Not Found"
+          },
+          "422": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UnprocessableEntity"
+                }
+              }
+            },
+            "description": "Unprocessable Entity"
+          },
+          "500": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InternalServerError"
+                }
+              }
+            },
+            "description": "Internal Server Error"
+          }
+        },
+        "summary": "List Enabled Providers",
+        "tags": [
+          "Provider Credentials"
+        ],
+        "x-authz": {
+          "description": "Requires organization membership. Auth is enforced by the manageBearerOrSessionAuth middleware in createApp.ts.",
+          "permission": "member",
+          "resource": "organization"
+        }
+      }
+    },
+    "/manage/tenants/{tenantId}/provider-credentials/test": {
+      "post": {
+        "operationId": "test-provider-credential",
+        "parameters": [
+          {
+            "description": "Tenant identifier",
+            "in": "path",
+            "name": "tenantId",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/TenantIdPathParam"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ProviderCredentialTestRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProviderCredentialTestResponse"
+                }
+              }
+            },
+            "description": "Test result"
+          },
+          "400": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BadRequest"
+                }
+              }
+            },
+            "description": "Bad Request"
+          },
+          "401": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Unauthorized"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "403": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Forbidden"
+                }
+              }
+            },
+            "description": "Forbidden"
+          },
+          "404": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/NotFound"
+                }
+              }
+            },
+            "description": "Not Found"
+          },
+          "422": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UnprocessableEntity"
+                }
+              }
+            },
+            "description": "Unprocessable Entity"
+          },
+          "500": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InternalServerError"
+                }
+              }
+            },
+            "description": "Internal Server Error"
+          }
+        },
+        "summary": "Test Provider Credentials",
+        "tags": [
+          "Provider Credentials"
+        ],
+        "x-authz": {
+          "description": "Requires organization membership. Auth is enforced by the manageBearerOrSessionAuth middleware in createApp.ts.",
+          "permission": "member",
+          "resource": "organization"
+        }
+      }
+    },
+    "/manage/tenants/{tenantId}/provider-credentials/{id}": {
+      "delete": {
+        "operationId": "delete-provider-credential",
+        "parameters": [
+          {
+            "description": "Tenant identifier",
+            "in": "path",
+            "name": "tenantId",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/TenantIdPathParam"
+            }
+          },
+          {
+            "description": "Resource identifier",
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/ResourceId"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Deleted"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Provider credential not found"
+          }
+        },
+        "summary": "Delete Provider Credential",
+        "tags": [
+          "Provider Credentials"
+        ],
+        "x-authz": {
+          "description": "Requires organization membership. Auth is enforced by the manageBearerOrSessionAuth middleware in createApp.ts.",
+          "permission": "member",
+          "resource": "organization"
+        }
+      },
+      "get": {
+        "operationId": "get-provider-credential",
+        "parameters": [
+          {
+            "description": "Tenant identifier",
+            "in": "path",
+            "name": "tenantId",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/TenantIdPathParam"
+            }
+          },
+          {
+            "description": "Resource identifier",
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/ResourceId"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProviderCredentialResponse"
+                }
+              }
+            },
+            "description": "Provider credential found"
+          },
+          "400": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BadRequest"
+                }
+              }
+            },
+            "description": "Bad Request"
+          },
+          "401": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Unauthorized"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "403": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Forbidden"
+                }
+              }
+            },
+            "description": "Forbidden"
+          },
+          "404": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/NotFound"
+                }
+              }
+            },
+            "description": "Not Found"
+          },
+          "422": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UnprocessableEntity"
+                }
+              }
+            },
+            "description": "Unprocessable Entity"
+          },
+          "500": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InternalServerError"
+                }
+              }
+            },
+            "description": "Internal Server Error"
+          }
+        },
+        "summary": "Get Provider Credential",
+        "tags": [
+          "Provider Credentials"
+        ],
+        "x-authz": {
+          "description": "Requires organization membership. Auth is enforced by the manageBearerOrSessionAuth middleware in createApp.ts.",
+          "permission": "member",
+          "resource": "organization"
+        }
+      },
+      "patch": {
+        "operationId": "update-provider-credential",
+        "parameters": [
+          {
+            "description": "Tenant identifier",
+            "in": "path",
+            "name": "tenantId",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/TenantIdPathParam"
+            }
+          },
+          {
+            "description": "Resource identifier",
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/ResourceId"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ProviderCredentialUpdate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProviderCredentialResponse"
+                }
+              }
+            },
+            "description": "Provider credential updated"
+          },
+          "400": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BadRequest"
+                }
+              }
+            },
+            "description": "Bad Request"
+          },
+          "401": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Unauthorized"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "403": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Forbidden"
+                }
+              }
+            },
+            "description": "Forbidden"
+          },
+          "404": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/NotFound"
+                }
+              }
+            },
+            "description": "Not Found"
+          },
+          "422": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UnprocessableEntity"
+                }
+              }
+            },
+            "description": "Unprocessable Entity"
+          },
+          "500": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InternalServerError"
+                }
+              }
+            },
+            "description": "Internal Server Error"
+          }
+        },
+        "summary": "Update Provider Credential",
+        "tags": [
+          "Provider Credentials"
+        ],
+        "x-authz": {
+          "description": "Requires organization membership. Auth is enforced by the manageBearerOrSessionAuth middleware in createApp.ts.",
+          "permission": "member",
+          "resource": "organization"
+        }
+      }
+    },
+    "/manage/tenants/{tenantId}/provider-credentials/{id}/test": {
+      "post": {
+        "operationId": "test-stored-provider-credential",
+        "parameters": [
+          {
+            "description": "Tenant identifier",
+            "in": "path",
+            "name": "tenantId",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/TenantIdPathParam"
+            }
+          },
+          {
+            "description": "Resource identifier",
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/ResourceId"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProviderCredentialTestResponse"
+                }
+              }
+            },
+            "description": "Test result"
+          },
+          "400": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BadRequest"
+                }
+              }
+            },
+            "description": "Bad Request"
+          },
+          "401": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Unauthorized"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "403": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Forbidden"
+                }
+              }
+            },
+            "description": "Forbidden"
+          },
+          "404": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/NotFound"
+                }
+              }
+            },
+            "description": "Not Found"
+          },
+          "422": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UnprocessableEntity"
+                }
+              }
+            },
+            "description": "Unprocessable Entity"
+          },
+          "500": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InternalServerError"
+                }
+              }
+            },
+            "description": "Internal Server Error"
+          }
+        },
+        "summary": "Test Stored Provider Credential",
+        "tags": [
+          "Provider Credentials"
+        ],
+        "x-authz": {
+          "description": "Requires organization membership. Auth is enforced by the manageBearerOrSessionAuth middleware in createApp.ts.",
+          "permission": "member",
+          "resource": "organization"
         }
       }
     },

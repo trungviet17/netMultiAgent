@@ -2,27 +2,55 @@
 
 import { useQuery } from '@tanstack/react-query';
 import { useParams } from 'next/navigation';
-import { fetchEnabledProviders } from '@/lib/api/provider-credentials';
+import {
+  type AvailableProviderModels,
+  fetchAvailableModels,
+  fetchEnabledProviders,
+} from '@/lib/api/provider-credentials';
 
 /**
- * Returns the list of provider IDs (e.g. ['openai', 'anthropic']) that have
- * an enabled credential configured for the current project.
+ * Returns the list of provider IDs (e.g. ['openai', 'anthropic']) that have an
+ * enabled credential configured for the current tenant/org.
  *
- * Used to filter the model dropdown so users only pick models they can actually call.
+ * Tenant-scoped on purpose: provider credentials live at the org level, so this
+ * works everywhere a `tenantId` is in the route — including project creation,
+ * where there is no `projectId` yet.
  */
 export function useEnabledProvidersQuery({ enabled = true }: { enabled?: boolean } = {}) {
-  const { tenantId, projectId } = useParams<{ tenantId?: string; projectId?: string }>();
+  const { tenantId } = useParams<{ tenantId?: string }>();
 
   return useQuery<string[]>({
-    queryKey: ['enabled-providers', tenantId, projectId],
+    queryKey: ['enabled-providers', tenantId],
     queryFn: () => {
-      if (!tenantId || !projectId) return Promise.resolve([]);
-      return fetchEnabledProviders(tenantId, projectId);
+      if (!tenantId) return Promise.resolve([]);
+      return fetchEnabledProviders(tenantId);
     },
-    enabled: enabled && Boolean(tenantId && projectId),
+    enabled: enabled && Boolean(tenantId),
     staleTime: 30_000,
     initialData: [],
     initialDataUpdatedAt: 0,
     meta: { defaultError: 'Failed to load enabled providers' },
+  });
+}
+
+/**
+ * Returns the models the current tenant/org can actually call, grouped by provider.
+ * Drives the model picker so users can't pick a model they have no credential for —
+ * and so `custom` providers show whatever `<baseUrl>/models` reports.
+ */
+export function useAvailableModelsQuery({ enabled = true }: { enabled?: boolean } = {}) {
+  const { tenantId } = useParams<{ tenantId?: string }>();
+
+  return useQuery<AvailableProviderModels[]>({
+    queryKey: ['available-models', tenantId],
+    queryFn: () => {
+      if (!tenantId) return Promise.resolve([]);
+      return fetchAvailableModels(tenantId);
+    },
+    enabled: enabled && Boolean(tenantId),
+    staleTime: 5 * 60_000,
+    initialData: [],
+    initialDataUpdatedAt: 0,
+    meta: { defaultError: 'Failed to load available models' },
   });
 }

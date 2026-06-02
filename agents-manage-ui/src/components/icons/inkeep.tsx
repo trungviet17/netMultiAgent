@@ -1,6 +1,11 @@
 import type { FC } from 'react';
 import type { IconComponentProps } from '@/components/ui/svg-icon';
+import { LogoMark } from '@/icons';
 
+/**
+ * Square Multi-agent Platform brand mark, sized via the `size` prop. Used as a
+ * compact brand icon (auth pages, cards). The mark renders in the brand red.
+ */
 export const InkeepIcon: FC<IconComponentProps> = ({
   size = 48,
   className,
@@ -9,14 +14,12 @@ export const InkeepIcon: FC<IconComponentProps> = ({
 }) => {
   const numericSize = typeof size === 'number' ? size : Number.parseFloat(String(size)) || 48;
   return (
-    <img
-      src="/assets/logo.png"
-      alt={ariaLabel ?? 'Multi-agent Platform Logo'}
-      width={numericSize * 2}
+    <LogoMark
+      width={numericSize}
       height={numericSize}
       className={className}
-      aria-hidden={ariaHidden}
-      style={{ objectFit: 'contain', width: 'auto', height: numericSize }}
+      {...(ariaLabel ? { 'aria-label': ariaLabel } : {})}
+      {...(ariaHidden ? { 'aria-hidden': ariaHidden } : {})}
     />
   );
 };

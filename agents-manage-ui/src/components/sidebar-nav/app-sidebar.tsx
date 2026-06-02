@@ -38,7 +38,7 @@ import {
 } from '@/components/ui/sidebar';
 import { STATIC_LABELS } from '@/constants/theme';
 import { useAuthSession } from '@/hooks/use-auth';
-import { InkeepLogo } from '@/icons';
+import { InkeepLogo, LogoMark } from '@/icons';
 import { fetchEntitlements } from '@/lib/api/entitlements';
 import { useCapabilitiesQuery } from '@/lib/query/capabilities';
 import { cn } from '@/lib/utils';
@@ -116,6 +116,11 @@ export const AppSidebar: FC<AppSidebarProps> = ({ open, setOpen, ...props }) => 
       url: `/${tenantId}/members`,
       icon: Users,
     },
+    {
+      title: STATIC_LABELS['provider-credentials'],
+      url: `/${tenantId}/provider-credentials`,
+      icon: Key,
+    },
     ...(hasEntitlements
       ? [
           {
@@ -183,11 +188,6 @@ export const AppSidebar: FC<AppSidebarProps> = ({ open, setOpen, ...props }) => 
           title: STATIC_LABELS.credentials,
           url: `/${tenantId}/projects/${projectId}/credentials`,
           icon: Lock,
-        },
-        {
-          title: 'Provider Credentials',
-          url: `/${tenantId}/projects/${projectId}/provider-credentials`,
-          icon: Key,
         },
         {
           title: STATIC_LABELS['external-agents'],
@@ -283,15 +283,19 @@ export const AppSidebar: FC<AppSidebarProps> = ({ open, setOpen, ...props }) => 
     >
       <SidebarHeader>
         <SidebarMenuButton asChild>
-          <Link href={`/${tenantId}/projects`}>
-            <InkeepLogo
-              role="img"
-              aria-label="Inkeep Logo"
-              className={cn(
-                'transition-all text-[#231F20] dark:text-white h-auto!',
-                open ? 'w-28!' : 'w-19.5!'
-              )}
-            />
+          <Link href={`/${tenantId}/projects`} aria-label="netMultiAgent Platform">
+            {open ? (
+              <InkeepLogo
+                aria-label="netMultiAgent Platform"
+                className="transition-all text-[#231F20] dark:text-white h-auto! w-44!"
+              />
+            ) : (
+              <LogoMark
+                role="img"
+                aria-label="netMultiAgent Platform"
+                className="transition-all size-7!"
+              />
+            )}
           </Link>
         </SidebarMenuButton>
       </SidebarHeader>

@@ -2,6 +2,8 @@
 
 import { GATEWAY_ROUTABLE_PROVIDERS_SET } from '@inkeep/agents-core/constants/models';
 import { Check, ChevronsUpDown, X } from 'lucide-react';
+import Link from 'next/link';
+import { useParams } from 'next/navigation';
 import { type FC, useEffect, useState } from 'react';
 import { modelOptions } from '@/components/agent/configuration/model-options';
 import { FieldLabel } from '@/components/agent/sidepane/form-components/label';
@@ -21,7 +23,10 @@ import { Input } from '@/components/ui/input';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Separator } from '@/components/ui/separator';
 import { useAgentActions } from '@/features/agent/state/use-agent-store';
-import { useEnabledProvidersQuery } from '@/lib/query/provider-credentials';
+import {
+  useAvailableModelsQuery,
+  useEnabledProvidersQuery,
+} from '@/lib/query/provider-credentials';
 import { cn } from '@/lib/utils';
 
 interface ModelSelectorProps {
@@ -56,10 +61,23 @@ export const ModelSelector: FC<ModelSelectorProps> = ({
   onClose,
 }) => {
   const [open, setOpen] = useState(defaultOpen);
+  const { tenantId } = useParams<{ tenantId?: string }>();
 
   const { data: enabledProviders = [] } = useEnabledProvidersQuery();
-  const hasProviderFilter = enabledProviders.length > 0;
+  const { data: availableModelGroups = [] } = useAvailableModelsQuery({ enabled: !gatewayOnly });
   const enabledSet = new Set(enabledProviders);
+  // Outside the gateway-only (fallback models) picker, the selectable models come
+  // exclusively from providers the org has configured credentials for. When nothing
+  // is configured we show an empty state pointing to the org-level provider settings.
+  const noProvidersConfigured = !gatewayOnly && enabledProviders.length === 0;
+
+  // Models discovered live from credentials (`/available-models`). Used to extend
+  // the static curated list — chiefly for `custom` providers, where we don't know
+  // the catalog at build time and have to call `<baseUrl>/models`.
+  const dynamicCustomModels =
+    availableModelGroups.find((g) => g.provider === 'custom')?.models ?? [];
+  const dynamicOpenRouterModels =
+    availableModelGroups.find((g) => g.provider === 'openrouter')?.models ?? [];
 
   const [showCustomInput, setShowCustomInput] = useState<
     'openrouter' | 'gateway' | 'nim' | 'custom' | 'azure' | null
@@ -230,12 +248,27 @@ export const ModelSelector: FC<ModelSelectorProps> = ({
                   );
                 })()}
               </CommandEmpty>
-              {/* Predefined models */}
+              {/* Empty state: no provider credentials configured for this org */}
+              {noProvidersConfigured && (
+                <div className="p-3 text-sm text-muted-foreground space-y-1">
+                  <p>No model providers configured yet.</p>
+                  {tenantId && (
+                    <Link
+                      href={`/${tenantId}/provider-credentials`}
+                      className="text-primary underline underline-offset-2"
+                    >
+                      Configure provider credentials
+                    </Link>
+                  )}
+                </div>
+              )}
+              {/* Predefined models — only providers with a configured credential (unless gatewayOnly) */}
               {Object.entries(modelOptions)
-                .filter(
-                  ([provider]) => !gatewayOnly || GATEWAY_ROUTABLE_PROVIDERS_SET.has(provider)
+                .filter(([provider]) =>
+                  gatewayOnly
+                    ? GATEWAY_ROUTABLE_PROVIDERS_SET.has(provider)
+                    : enabledSet.has(provider)
                 )
-                .filter(([provider]) => !hasProviderFilter || enabledSet.has(provider))
                 .map(([provider, models]) => (
                   <CommandGroup key={provider} heading={provider}>
                     {models.map((model) => (
@@ -261,9 +294,30 @@ export const ModelSelector: FC<ModelSelectorProps> = ({
                     ))}
                   </CommandGroup>
                 ))}
-              {/* Custom OpenAI-compatible */}
-              {!gatewayOnly && (!hasProviderFilter || enabledSet.has('custom')) && (
+              {/* Custom OpenAI-compatible — live catalog from `<baseUrl>/models` */}
+              {!gatewayOnly && enabledSet.has('custom') && (
                 <CommandGroup heading="Custom OpenAI-compatible">
+                  {dynamicCustomModels.map((model) => (
+                    <CommandItem
+                      key={model.id}
+                      className="flex items-center justify-between cursor-pointer text-foreground"
+                      value={model.id}
+                      onSelect={(currentValue) => {
+                        onValueChange(currentValue === value ? '' : currentValue);
+                        setOpen(false);
+                        setCustomModelInput('');
+                        setShowCustomInput(null);
+                      }}
+                    >
+                      <span className="truncate">{model.label ?? model.id}</span>
+                      <Check
+                        className={cn(
+                          'ml-2 h-4 w-4 shrink-0',
+                          value === model.id ? 'opacity-100' : 'opacity-0'
+                        )}
+                      />
+                    </CommandItem>
+                  ))}
                   <CommandItem
                     className="flex items-center justify-between cursor-pointer text-foreground"
                     value="__custom__"
@@ -273,14 +327,38 @@ export const ModelSelector: FC<ModelSelectorProps> = ({
                       setCustomModelInput('');
                     }}
                   >
-                    Custom OpenAI-compatible ...
+                    {dynamicCustomModels.length > 0
+                      ? 'Enter custom model ID ...'
+                      : 'Custom OpenAI-compatible ...'}
                   </CommandItem>
                 </CommandGroup>
               )}
               {/* LLM Gateway options */}
               {!gatewayOnly && (
                 <CommandGroup heading="LLM Gateway">
-                  {(!hasProviderFilter || enabledSet.has('openrouter')) && (
+                  {enabledSet.has('openrouter') &&
+                    dynamicOpenRouterModels.slice(0, 50).map((model) => (
+                      <CommandItem
+                        key={model.id}
+                        className="flex items-center justify-between cursor-pointer text-foreground"
+                        value={model.id}
+                        onSelect={(currentValue) => {
+                          onValueChange(currentValue === value ? '' : currentValue);
+                          setOpen(false);
+                          setCustomModelInput('');
+                          setShowCustomInput(null);
+                        }}
+                      >
+                        <span className="truncate">{model.label ?? model.id}</span>
+                        <Check
+                          className={cn(
+                            'ml-2 h-4 w-4 shrink-0',
+                            value === model.id ? 'opacity-100' : 'opacity-0'
+                          )}
+                        />
+                      </CommandItem>
+                    ))}
+                  {enabledSet.has('openrouter') && (
                     <CommandItem
                       className="flex items-center justify-between cursor-pointer text-foreground"
                       value="__openrouter__"
@@ -291,7 +369,9 @@ export const ModelSelector: FC<ModelSelectorProps> = ({
                         onValueChange('openrouter/...');
                       }}
                     >
-                      OpenRouter ...
+                      {dynamicOpenRouterModels.length > 0
+                        ? 'Enter OpenRouter model ID ...'
+                        : 'OpenRouter ...'}
                     </CommandItem>
                   )}
                   <CommandItem

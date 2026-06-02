@@ -20,6 +20,7 @@ export * from './model-credentials-resolver';
 export * from './model-factory';
 export * from './pow';
 export * from './provider-credential-test';
+export * from './provider-model-discovery';
 export * from './retry';
 export * from './schema-conversion';
 export * from './secret-encryption';
