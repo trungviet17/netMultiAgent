@@ -114,7 +114,7 @@ services:
     restart: "no"
 
   inkeep-agents-doltgres-db:
-    image: dolthub/doltgresql:0.56.1
+    image: dolthub/doltgresql:0.56.4
     restart: unless-stopped
     environment:
       DOLTGRES_USER: appuser
@@ -146,7 +146,7 @@ services:
 
   # SpiceDB for authorization
   inkeep-agents-spicedb:
-    image: authzed/spicedb:v1.49.2
+    image: authzed/spicedb:v1.53.0
     command: serve
     restart: unless-stopped
     environment:
@@ -166,7 +166,7 @@ services:
         condition: service_completed_successfully
 
   inkeep-agents-spicedb-migrate:
-    image: authzed/spicedb:v1.49.2
+    image: authzed/spicedb:v1.53.0
     command: migrate head
     restart: "no"
     environment:
